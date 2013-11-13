@@ -1,8 +1,6 @@
-module ArcGIS
-  module Terraformer
+module Terraformer
 
-    class MultiPolygon < Geometry
-    end
-
+  class MultiPolygon < Geometry
   end
+
 end

@@ -1,8 +1,6 @@
-module ArcGIS
-  module Terraformer
+module Terraformer
 
-    class MultiPoint < Geometry
-    end
-
+  class MultiPoint < Geometry
   end
+
 end

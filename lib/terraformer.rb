@@ -3,41 +3,39 @@ require 'bigdecimal'
 require 'bigdecimal/math'
 require 'bigdecimal/util'
 
-module ArcGIS
-  module Terraformer
+module Terraformer
 
-    PRECISION = 8
+  PRECISION = 8
 
-    EARTH_RADIUS = 6378137.to_d
-    DEGREES_PER_RADIAN = 180.0.to_d / Math::PI.to_d
-    RADIANS_PER_DEGREE = Math::PI.to_d / 180.0.to_d
-    MERCATOR_CRS = {
-      type: "link",
-      properties: {
-        href: "http://spatialreference.org/ref/sr-org/6928/ogcwkt/",
-        type: "ogcwkt"
-      }
+  EARTH_RADIUS = 6378137.to_d
+  DEGREES_PER_RADIAN = 180.0.to_d / Math::PI.to_d
+  RADIANS_PER_DEGREE = Math::PI.to_d / 180.0.to_d
+  MERCATOR_CRS = {
+    type: "link",
+    properties: {
+      href: "http://spatialreference.org/ref/sr-org/6928/ogcwkt/",
+      type: "ogcwkt"
     }
-    GEOGRAPHIC_CRS = {
-      type: "link",
-      properties: {
-        href: "http://spatialreference.org/ref/epsg/4326/ogcwkt/",
-        type: "ogcwkt"
-      }
+  }
+  GEOGRAPHIC_CRS = {
+    type: "link",
+    properties: {
+      href: "http://spatialreference.org/ref/epsg/4326/ogcwkt/",
+      type: "ogcwkt"
     }
+  }
 
-    def self.parse geojson
-      geojson = JSON.parse geojson if String === geojson
-      raise ArgumentError unless Hash === geojson
+  def self.parse geojson
+    geojson = JSON.parse geojson if String === geojson
+    raise ArgumentError unless Hash === geojson
 
-      if klass = Terraformer.const_get(geojson['type'])
-        klass.new geojson
-      else
-        raise ArgumentError.new 'unknown type: ' + geojson['type']
-      end
+    if klass = Terraformer.const_get(geojson['type'])
+      klass.new geojson
+    else
+      raise ArgumentError.new 'unknown type: ' + geojson['type']
     end
-
   end
+
 end
 
 module Enumerable
@@ -82,21 +80,21 @@ end
 class BigDecimal
 
   def to_deg
-    self * ArcGIS::Terraformer::DEGREES_PER_RADIAN
+    self * Terraformer::DEGREES_PER_RADIAN
   end
 
   def to_rad
-    self * ArcGIS::Terraformer::RADIANS_PER_DEGREE
+    self * Terraformer::RADIANS_PER_DEGREE
   end
 
 end
 
-require 'arcgis/terraformer/coordinate'
-require 'arcgis/terraformer/bounds'
-require 'arcgis/terraformer/geometry'
-require 'arcgis/terraformer/point'
-require 'arcgis/terraformer/multi_point'
-require 'arcgis/terraformer/line_string'
-require 'arcgis/terraformer/multi_line_string'
-require 'arcgis/terraformer/polygon'
-require 'arcgis/terraformer/multi_polygon'
+require 'terraformer/coordinate'
+require 'terraformer/bounds'
+require 'terraformer/geometry'
+require 'terraformer/point'
+require 'terraformer/multi_point'
+require 'terraformer/line_string'
+require 'terraformer/multi_line_string'
+require 'terraformer/polygon'
+require 'terraformer/multi_polygon'

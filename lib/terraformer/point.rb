@@ -1,8 +1,6 @@
-module ArcGIS
-  module Terraformer
+module Terraformer
 
-    class Point < Geometry
-    end
-
+  class Point < Geometry
   end
+
 end

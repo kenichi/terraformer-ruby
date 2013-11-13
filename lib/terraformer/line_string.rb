@@ -1,8 +1,6 @@
-module ArcGIS
-  module Terraformer
+module Terraformer
 
-    class LineString < Geometry
-    end
-
+  class LineString < Geometry
   end
+
 end

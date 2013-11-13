@@ -1,8 +1,6 @@
-module ArcGIS
-  module Terraformer
+module Terraformer
 
-    class MultiLineString < Geometry
-    end
-
+  class MultiLineString < Geometry
   end
+
 end

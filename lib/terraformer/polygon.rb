@@ -1,8 +1,6 @@
-module ArcGIS
-  module Terraformer
+module Terraformer
 
-    class Polygon < Geometry
-    end
-
+  class Polygon < Geometry
   end
+
 end
