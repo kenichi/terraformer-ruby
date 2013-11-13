@@ -1,24 +1,19 @@
 module Terraformer
 
-  class Geometry
+  class Geometry < Primitive
 
     MULTI_REGEX = /^Multi/
 
     attr_accessor :coordinates
 
     def initialize *args
-      if args.length > 1
+      if args.length > 1 or Array === args[0]
         self.coordinates = Coordinate.from_array args
       else
-        arg = String === args[0] ? JSON.parse(args[0]) : args[0]
-        raise ArgumentError.new "invalid argument(s): #{args}" unless Hash === arg
-        raise ArgumentError.new "invalid type: #{arg['type']}" unless arg['type'] == self.type
-        self.coordinates = Coordinate.from_array arg['coordinates']
+        super *args do |arg|
+          self.coordinates = Coordinate.from_array arg['coordinates']
+        end
       end
-    end
-
-    def type
-      self.class.to_s.sub 'Terraformer::', ''
     end
 
     def to_hash
@@ -26,10 +21,6 @@ module Terraformer
         type: type,
         coordinates: coordinates
       }
-    end
-
-    def to_json *args
-      self.to_hash.to_json *args
     end
 
     def to_mercator
@@ -49,14 +40,6 @@ module Terraformer
       end
     end
 
-    def envelope
-      Bounds.envelope self
-    end
-
-    def bbox
-      Bounds.bounds self
-    end
-
     def convex_hull
       raise NotImplementedError
     end
@@ -71,6 +54,31 @@ module Terraformer
 
     def intersects other
       raise NotImplementedError
+    end
+
+  end
+
+  class GeometryCollection < Primitive
+
+    attr_writer :geometries
+
+    def initialize *args
+      unless args.empty?
+        super *args do |arg|
+          self.geometries = arg['geometries'].map {|g| Terraformer.parse g}
+        end
+      end
+    end
+
+    def geometries
+      @geometries ||= []
+    end
+
+    def to_hash
+      {
+        type: type,
+        geometries: geometries.map(&:to_hash)
+      }
     end
 
   end

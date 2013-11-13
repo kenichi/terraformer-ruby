@@ -3,35 +3,43 @@ module Terraformer
   module Bounds
     class << self
 
-      def bounds geojson = nil
+      def bounds obj, format = :bbox
 
-        geojson = JSON.parse geojson if String === geojson
-        unless Hash === geojson
-          raise ArgumentError.new 'must be parsed or parseable geojson'
-        end
+        obj = Terraformer.parse obj unless Primitive === obj
 
-        case geojson['type']
-        when 'Point'
-          [ geojson['coordinates'][0], geojson['coordinates'][1],
-            geojson['coordinates'][0], geojson['coordinates'][1] ]
-        when 'MultiPoint'
-          bounds_for_array geojson['coordinates']
-        when 'LineString'
-          bounds_for_array geojson['coordinates']
-        when 'MultiLineString'
-          bounds_for_array geojson['coordinates'], 1
-        when 'Polygon'
-          bounds_for_array geojson['coordinates'], 1
-        when 'MultiPolygon'
-          bounds_for_array geojson['coordinates'], 2
-        when 'Feature'
-          geojson['geometry'] ? bounds(geojson['geometry']) : nil
-        when 'FeatureCollection'
-          bounds_for_feature_collection geojson
-        when 'GeometryCollection'
-          bounds_for_geometry_collection geojson
-        else
-          raise ArgumentError.new 'unknown type: ' + geojson['type']
+        bbox = case obj.type
+               when 'Point'
+                 [ obj.coordinates[0], obj.coordinates[1],
+                   obj.coordinates[0], obj.coordinates[1] ]
+               when 'MultiPoint'
+                 bounds_for_array obj.coordinates
+               when 'LineString'
+                 bounds_for_array obj.coordinates
+               when 'MultiLineString'
+                 bounds_for_array obj.coordinates, 1
+               when 'Polygon'
+                 bounds_for_array obj.coordinates, 1
+               when 'MultiPolygon'
+                 bounds_for_array obj.coordinates, 2
+               when 'Feature'
+                 obj.geometry ? bounds(obj.geometry) : nil
+               when 'FeatureCollection'
+                 bounds_for_feature_collection obj
+               when 'GeometryCollection'
+                 bounds_for_geometry_collection obj
+               else
+                 raise ArgumentError.new 'unknown type: ' + obj.type
+               end
+
+        case format
+        when :bbox
+          bbox
+        when :polygon
+          Polygon.new [[bbox[0], bbox[1]],
+                       [bbox[0], bbox[3]],
+                       [bbox[2], bbox[3]],
+                       [bbox[2], bbox[1]],
+                       [bbox[0], bbox[1]]]
         end
       end
 
@@ -56,26 +64,20 @@ module Terraformer
       end
 
       def bounds_for_feature_collection fc
-        bounds_for_collection 'features', fc {|f| f['geometry']}
+        bounds_for_collection fc.features, &:geometry
       end
 
       def bounds_for_geometry_collection gc
-        bounds_for_collection 'geomteries', gc
+        bounds_for_collection gc
       end
 
-      def bounds_for_collection type, collection, &block
-        extents = []
-        collection[type].each do |e|
-          es = bounds (block_given? ? yield(e) : e)
-          extents << [ es[0], es[1] ]
-          extents << [ es[2], es[3] ]
-        end
-        bounds extents
+      def bounds_for_collection collection
+        bounds_for_array collection.map {|e| bounds(block_given? ? yield(e) : e)}
       end
       private :bounds_for_collection
 
-      def envelope geojson
-        b = bounds geojson
+      def envelope geometry
+        b = bounds geometry
         {
           x: b[0],
           y: b[1],

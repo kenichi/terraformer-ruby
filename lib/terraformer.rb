@@ -27,13 +27,44 @@ module Terraformer
 
   def self.parse geojson
     geojson = JSON.parse geojson if String === geojson
-    raise ArgumentError unless Hash === geojson
+    raise ArgumentError.new "invalid arg: #{geojson}" unless Hash === geojson
 
     if klass = Terraformer.const_get(geojson['type'])
       klass.new geojson
     else
       raise ArgumentError.new 'unknown type: ' + geojson['type']
     end
+  end
+
+  class Primitive
+
+    def initialize *args
+      arg = String === args[0] ? JSON.parse(args[0]) : args[0]
+      raise ArgumentError.new "invalid argument(s): #{args}" unless Hash === arg
+      raise ArgumentError.new "invalid type: #{arg['type']}" unless arg['type'] == self.type
+      yield arg if block_given?
+    end
+
+    def type
+      self.class.to_s.sub 'Terraformer::', ''
+    end
+
+    def envelope
+      Bounds.envelope self
+    end
+
+    def bbox type = :bbox
+      Bounds.bounds self, type
+    end
+
+    def to_json *args
+      self.to_hash.to_json *args
+    end
+
+    def [] prop
+      self.__send__ prop.to_sym
+    end
+
   end
 
 end
@@ -92,6 +123,7 @@ end
 require 'terraformer/coordinate'
 require 'terraformer/bounds'
 require 'terraformer/geometry'
+require 'terraformer/feature'
 require 'terraformer/point'
 require 'terraformer/multi_point'
 require 'terraformer/line_string'
