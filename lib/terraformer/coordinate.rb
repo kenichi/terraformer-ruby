@@ -18,7 +18,7 @@ module Terraformer
           BigDecimal.new n
         when BigDecimal
           n
-        when Float
+        when Numeric
           n.to_d
         end
       end
@@ -36,6 +36,8 @@ module Terraformer
         raise ArgumentError unless _y
         self.x = _x
         self.y = _y
+      else
+        raise ArgumentError.new "invalid argument: #{_x}"
       end
     end
 
