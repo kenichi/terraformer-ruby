@@ -6,10 +6,12 @@ require 'bigdecimal/util'
 module Terraformer
 
   PRECISION = 8
+  PI = BigMath.PI PRECISION
+  DEFAULT_BUFFER_RESOLUTION = 64
 
   EARTH_RADIUS = 6378137.to_d
-  DEGREES_PER_RADIAN = 180.0.to_d / Math::PI.to_d
-  RADIANS_PER_DEGREE = Math::PI.to_d / 180.0.to_d
+  DEGREES_PER_RADIAN = 180.0.to_d / PI
+  RADIANS_PER_DEGREE = PI / 180.0.to_d
   MERCATOR_CRS = {
     type: "link",
     properties: {

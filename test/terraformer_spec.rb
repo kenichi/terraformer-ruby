@@ -110,6 +110,28 @@ describe Terraformer do
       p.coordinates[1][1][4].must_equal Terraformer::Coordinate.new 100.2, 0.2
     end
 
+    it 'parses as geographic' do
+      [:point, :multi_point, :line_string, :multi_line_string,
+       :polygon, :polygon_with_holes, :multi_polygon].each do |type|
+        g = Terraformer.parse EXAMPLES[type]
+        assert g.geographic?
+      end
+    end
+
+  end
+
+  describe 'coordinates' do
+
+    it 'buffers into circles' do
+      p = Terraformer.parse EXAMPLES[:point]
+      p.dont_be_terrible_ok
+      p.type.must_equal 'Point'
+      p.coordinates.must_be_instance_of Terraformer::Coordinate
+      p.coordinates.must_equal Terraformer::Coordinate.new 100, 0
+      c = p.coordinates.buffer 100
+      JSON.parse(c.to_json).must_equal JSON.parse(EXAMPLES[:circle])
+    end
+
   end
 
 end

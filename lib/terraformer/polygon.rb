@@ -6,6 +6,10 @@ module Terraformer
       coordinates.length > 1
     end
 
+    def first_coordinate
+      coordinates[0][0]
+    end
+
   end
 
 end

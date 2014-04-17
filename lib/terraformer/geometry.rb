@@ -31,6 +31,18 @@ module Terraformer
       self.class.new *coordinates.map_coordinate(&:to_geographic)
     end
 
+    def first_coordinate
+      raise NotImplementedError
+    end
+
+    def mercator?
+      first_coordinate.mercator?
+    end
+
+    def geographic?
+      first_coordinate.geographic?
+    end
+
     def get index
       if MULTI_REGEX.match type
         sub = type.sub MULTI_REGEX, ''

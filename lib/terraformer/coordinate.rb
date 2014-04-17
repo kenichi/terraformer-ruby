@@ -2,6 +2,8 @@ module Terraformer
 
   class Coordinate < ::Array
 
+    attr_accessor :crs
+
     class << self
 
       def from arys
@@ -76,18 +78,41 @@ module Terraformer
         (Math::PI / 2).to_d -
         (2 * BigMath.atan(BigMath.exp(-1.0 * y / EARTH_RADIUS, PRECISION), PRECISION))
       ).to_deg
-      self.class.new _x, _y
+      geog = self.class.new _x, _y
+      geog.crs = GEOGRAPHIC_CRS
+      geog
     end
 
     def to_mercator
       _x = x.to_rad * EARTH_RADIUS
       syr = BigMath.sin y.to_rad, PRECISION
       _y = (EARTH_RADIUS / 2.0) * BigMath.log((1.0 + syr) / (1.0 - syr), PRECISION)
-      self.class.new _x, _y
+      merc = self.class.new _x, _y
+      merc.crs = MERCATOR_CRS
+      merc
     end
 
     def to_json *args
       [x, y, z, m].map! {|e| e.nil? ? nil : e.to_f}.compact.to_json(*args)
+    end
+
+    def geographic?
+      crs.nil? or crs == GEOGRAPHIC_CRS
+    end
+
+    def mercator?
+      crs == MERCATOR_CRS
+    end
+
+    def buffer radius, resolution = DEFAULT_BUFFER_RESOLUTION
+      center = to_mercator unless mercator?
+      coordinates = (1..resolution).map {|step|
+        radians = step.to_d * (360.to_d / resolution.to_d) * PI / 180.to_d
+        [center.x + radius.to_d * BigMath.cos(radians, PRECISION),
+         center.y + radius.to_d * BigMath.sin(radians, PRECISION)]
+      }
+      coordinates << coordinates[0]
+      Polygon.new(coordinates).to_geographic
     end
 
   end
