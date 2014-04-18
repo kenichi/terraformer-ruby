@@ -70,7 +70,7 @@ module Terraformer
 
     # todo - this is algorithmically bad, fix it
     #
-    def distance other
+    def great_circle_distance other
       min_d = nil
       self.coordinates.each_coordinate do |my_c|
         other.coordinates.each_coordinate do |other_c|

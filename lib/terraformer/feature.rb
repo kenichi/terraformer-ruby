@@ -29,6 +29,11 @@ module Terraformer
       h
     end
 
+    def great_circle_distance other
+      other = other.geometry if Feature === other
+      self.geometry.great_circle_distance other
+    end
+
   end
 
   class FeatureCollection < Primitive

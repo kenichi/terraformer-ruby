@@ -27,6 +27,12 @@ module Terraformer
         end
       end
 
+      # http://tixxit.wordpress.com/2009/12/09/jarvis-march
+      #
+      def turn p, q, r
+        ((q[0] - p[0]) * (r[1] - p[1]) - (r[0] - p[0]) * (q[1] - p[1])) <=> 0
+      end
+
     end
 
     def initialize _x, _y = nil, _z = nil, _m = nil
@@ -139,6 +145,28 @@ module Terraformer
       c = 2 * Math.atan2(BigMath.sqrt(a, PRECISION).to_f, BigMath.sqrt((1 - a), PRECISION).to_f)
 
       c * MEAN_RADIUS_EARTH
+    end
+
+    def <=> other
+      raise ArgumentError unless Coordinate === other
+      dx = x - other.x
+      dy = y - other.y
+      case
+      when dx > dy; 1
+      when dx < dy; -1
+      else;         0
+      end
+    end
+
+    def squared_euclidean_distance other
+      raise ArgumentError unless Coordinate === other
+      dx = other.x - x
+      dy = other.y - y
+      dx**2 + dy**2
+    end
+
+    def euclidean_distance other
+      squared_euclidean_distance(other).sqrt
     end
 
   end

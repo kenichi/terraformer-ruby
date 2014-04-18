@@ -28,7 +28,10 @@ module Terraformer
   }
 
   def self.parse geojson
-    geojson = JSON.parse geojson if String === geojson
+    if String === geojson
+      geojson = File.read geojson if File.readable? geojson
+      geojson = JSON.parse geojson
+    end
     raise ArgumentError.new "invalid arg: #{geojson}" unless Hash === geojson
 
     if klass = Terraformer.const_get(geojson['type'])
