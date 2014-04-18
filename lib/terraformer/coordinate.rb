@@ -2,6 +2,8 @@ module Terraformer
 
   class Coordinate < ::Array
 
+    MEAN_RADIUS_EARTH = 6371000
+
     attr_accessor :crs
 
     class << self
@@ -38,6 +40,10 @@ module Terraformer
         raise ArgumentError unless _y
         self.x = _x
         self.y = _y
+      when String
+        raise ArgumentError unless _y
+        self.x = BigDecimal(_x)
+        self.y = BigDecimal(_y)
       else
         raise ArgumentError.new "invalid argument: #{_x}"
       end
@@ -113,6 +119,26 @@ module Terraformer
       }
       coordinates << coordinates[0]
       Polygon.new(coordinates).to_geographic
+    end
+
+    # todo - this is also probably algorithmically bad, fix that sucker
+    #
+    def great_circle_distance other
+      raise ArgumentError unless Coordinate === other
+
+      d_lat = (self.y - other.y).to_rad
+      d_lon = (self.x - other.x).to_rad
+
+      lat_r = self.y.to_rad
+      other_lat_r = other.y.to_rad
+
+      a = BigMath.sin(d_lat / 2, PRECISION)**2 +
+          BigMath.sin(d_lon / 2, PRECISION)**2 *
+          BigMath.cos(lat_r, PRECISION) * BigMath.cos(other_lat_r, PRECISION)
+
+      c = 2 * Math.atan2(BigMath.sqrt(a, PRECISION).to_f, BigMath.sqrt((1 - a), PRECISION).to_f)
+
+      c * MEAN_RADIUS_EARTH
     end
 
   end
