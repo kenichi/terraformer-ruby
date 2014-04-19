@@ -166,7 +166,7 @@ module Terraformer
     end
 
     def euclidean_distance other
-      squared_euclidean_distance(other).sqrt
+      BigMath.sqrt squared_euclidean_distance(other), PRECISION
     end
 
   end
