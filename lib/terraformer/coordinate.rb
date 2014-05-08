@@ -2,7 +2,9 @@ module Terraformer
 
   class Coordinate < ::Array
 
-    MEAN_RADIUS_EARTH = 6371000
+    # http://en.wikipedia.org/wiki/Earth_radius#Mean_radius
+    #
+    MEAN_RADIUS_EARTH = 6371009.to_d
 
     attr_accessor :crs
 
@@ -104,6 +106,10 @@ module Terraformer
       merc
     end
 
+    def to_s
+      [x,y,z,m].compact.join ','
+    end
+
     def to_json *args
       [x, y, z, m].map! {|e| e.nil? ? nil : e.to_f}.compact.to_json(*args)
     end
@@ -142,7 +148,9 @@ module Terraformer
           BigMath.sin(d_lon / 2, PRECISION)**2 *
           BigMath.cos(lat_r, PRECISION) * BigMath.cos(other_lat_r, PRECISION)
 
-      c = 2 * Math.atan2(BigMath.sqrt(a, PRECISION).to_f, BigMath.sqrt((1 - a), PRECISION).to_f)
+      y = BigMath.sqrt a, PRECISION
+      x = BigMath.sqrt (1 - a), PRECISION
+      c = 2 * BigMath.atan2(y, x, PRECISION)
 
       c * MEAN_RADIUS_EARTH
     end

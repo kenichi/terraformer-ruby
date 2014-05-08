@@ -1,125 +1,143 @@
+require 'bigdecimal/math'
+
 module Terraformer
-  module Geodesic
 
-    def self.inverse_geodetic_solver a, b
+  class Geodesic
 
-      # raise if not Coordinate
-      #
-      [a,b].each {|x| raise ArgumentError unless Coordinate === x}
+    MAX_ITERS = 20
+    attr_accessor :precision
 
-      # convert to rads
-      #
-      lat1 = a.y.to_rad
-      lon1 = a.x.to_rad
-      lat2 = b.y.to_rad
-      lon2 = b.x.to_rad
-
-      # WSG84 ellipsoid params
-      #
-      a = 6378137.to_d
-      b = 6356752.31424518.to_d
-      f = 1.to_d / 298.257223563.to_d
-
-      _l = lon2 - lon1
-      u1 = BigMath.atan(((1 - f) * Math.tan(lat1.to_f).to_d), PRECISION)
-      u2 = BigMath.atan(((1 - f) * Math.tan(lat2.to_f).to_d), PRECISION)
-
-      sin_u1 = BigMath.sin u1, PRECISION
-      cos_u1 = BigMath.cos u1, PRECISION
-
-      sin_u2 = BigMath.sin u2, PRECISION
-      cos_u2 = BigMath.cos u2, PRECISION
-
-      _lambda = _l
-      iter_limit = 1000
-
-      begin
-
-        sin_lambda = BigMath.sin _lambda, PRECISION
-        cos_lambda = BigMath.cos _lambda, PRECISION
-        sin_sigma = BigMath.sqrt(
-          ((cos_u2 * sin_lambda) * (cos_u2 * sin_lambda) + (cos_u1 * sin_u2 - sin_u1 * cos_u2 * cos_lambda) *
-          (cos_u1 * sin_u2 - sin_u1 * cos_u2 * cos_lambda)),
-          PRECISION)
-
-        return 0 if sin_sigma == 0
-
-        cos_sigma = sin_u1 * sin_u2 + cos_u1 * cos_u2 * cos_lambda
-        sigma = Math.atan2 sin_sigma.to_f, cos_sigma.to_f
-        sin_alpha = cos_u1 * cos_u2 * sin_lambda / sin_sigma
-        cos_sq_alpha = 1 - sin_alpha * sin_alpha
-        cos_2_sigma_m = cos_sigma - 2 * sin_u1 * sin_u2 / cos_sq_alpha
-
-        # todo KEEP GOING
-
-      end while (_lambda - _lambda_p).to_f.abs > 1e-12 and (iterLimit -= 1) > 0
-
-
+    def self.test
+      a = Coordinate.new -122.6764, 45.5165
+      b = a + [0.02, 0.02]
+      r = a.distance_and_bearing_to b
+      puts "distance between #{a} and #{b} : #{r[:distance]}"
+      puts "initial bearing: #{r[:bearing][:initial]}"
+      puts "final bearing: #{r[:bearing][:final]}"
     end
 
-=begin
-    function _inverseGeodeticSolver( /*radians*/ lat1, /*radians*/ lon1, /*radians*/ lat2, /*radians*/ lon2) {
-      var a = 6378137,
-      b = 6356752.31424518,
-      f = 1 / 298.257223563; // WGS84 ellipsoid params
-      var L = (lon2 - lon1);
-      var U1 = Math.atan((1 - f) * Math.tan(lat1));
-      var U2 = Math.atan((1 - f) * Math.tan(lat2));
-      var sinU1 = Math.sin(U1),
-        cosU1 = Math.cos(U1);
-      var sinU2 = Math.sin(U2),
-        cosU2 = Math.cos(U2);
-      var lambda = L,
-        lambdaP, iterLimit = 1000;
-      var cosSqAlpha, sinSigma, cos2SigmaM, cosSigma, sigma;
-      do {
-        var sinLambda = Math.sin(lambda),
-        cosLambda = Math.cos(lambda);
-        sinSigma = Math.sqrt((cosU2 * sinLambda) * (cosU2 * sinLambda) + (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
-        if (sinSigma === 0) {
-          return 0;
-        }
-        cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
-        sigma = Math.atan2(sinSigma, cosSigma);
-        var sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma;
-        cosSqAlpha = 1 - sinAlpha * sinAlpha;
-        cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha;
-        if (isNaN(cos2SigmaM)) {
-          cos2SigmaM = 0;
-        }
-        var C = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha));
-        lambdaP = lambda;
-        lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
-      }
-      while (Math.abs(lambda - lambdaP) > 1e-12 && --iterLimit > 0);
-        if (iterLimit === 0) {
-          //return NaN;
-          //As Vincenty pointed out, when two points are nearly antipodal, the formula may not converge
-          //It's time to switch to other formula, which may not as highly accurate as Vincenty's. Just for the special case.
-            //Here implements Haversine formula
-          var haversine_R = 6371009; // km
-          var haversine_d = Math.acos(Math.sin(lat1)*Math.sin(lat2) + Math.cos(lat1)*Math.cos(lat2) * Math.cos(lon2-lon1)) * haversine_R;
-          var dLon = lon2-lon1;
-          var y = Math.sin(dLon) * Math.cos(lat2);
-          var x = Math.cos(lat1)*Math.sin(lat2) - Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
-          var brng = Math.atan2(y, x);
-          return {"azimuth": brng, "geodesicDistance": haversine_d};
-        }
-        var uSq = cosSqAlpha * (a * a - b * b) / (b * b);
-        var A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
-        var B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
-        var deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) - B / 6 * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
-        var s = b * A * (sigma - deltaSigma);
-        var alpha1 = Math.atan2(cosU2 * Math.sin(lambda), cosU1 * sinU2 - sinU1 * cosU2 * Math.cos(lambda));
-        var alpha2 = Math.atan2(cosU1 * Math.sin(lambda), cosU1 * sinU2 * Math.cos(lambda) - sinU1 * cosU2);
-        var inverseResult = {
-          azimuth: alpha1,
-          geodesicDistance: s,
-          reverseAzimuth: alpha2
-        };
-        return inverseResult;
-    }
-=end
+    class << self
+      [:sin, :cos, :tan, :sqrt, :atan, :atan2].each do |m|
+        define_method m do |*a|
+          BigMath.__send__ m, *a.push(PRECISION)
+        end
+      end
+    end
+
+    # http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
+    #
+    def self.compute_distance_and_bearing lat_1, lon_1, lat_2, lon_2, results = [], initial_bearing = false, final_bearing = false
+
+      lat_1 = lat_1.to_rad
+      lat_2 = lat_2.to_rad
+      lon_1 = lon_1.to_rad
+      lon_2 = lon_2.to_rad
+
+      a = 6378137.to_d
+      b = 6356752.3142.to_d
+      f = (a - b) / a
+      a_sq_minus_b_sq_over_b_sq = (a * a - b * b) / (b * b)
+
+      _l = lon_2 - lon_1
+      _a = BigMath::ZERO
+      _u1 = atan((BigMath::ONE - f) * tan(lat_1))
+      _u2 = atan((BigMath::ONE - f) * tan(lat_2))
+
+      cos_u1 = cos(_u1)
+      cos_u2 = cos(_u2)
+      sin_u1 = sin(_u1)
+      sin_u2 = sin(_u2)
+      cos_u1_cos_u2 = cos_u1 * cos_u2
+      sin_u1_sin_u2 = sin_u1 * sin_u2
+
+      sigma = BigMath::ZERO
+      delta_sigma = BigMath::ZERO
+      cos_sq_alpha = BigMath::ZERO
+      cos2_s_m = BigMath::ZERO
+      cos_sigma = BigMath::ZERO
+      sin_sigma = BigMath::ZERO
+      cos_lambda = BigMath::ZERO
+      sin_lambda = BigMath::ZERO
+
+      _lambda = _l
+      MAX_ITERS.times do |n|
+        _lambda_orig = _lambda
+        cos_lambda = cos(_lambda)
+        sin_lambda = sin(_lambda)
+        t1 = cos_u2 * sin_lambda
+        t2 = cos_u1 * sin_u2 - sin_u1 * cos_u2 * cos_lambda
+        sin_sq_sigma = t1 * t1 + t2 * t2
+        sin_sigma = sqrt(sin_sq_sigma)
+        cos_sigma = sin_u1_sin_u2 + cos_u1_cos_u2 * cos_lambda
+        sigma = atan2(sin_sigma, cos_sigma)
+        sin_alpha = (sin_sigma == BigMath::ZERO) ? BigMath::ZERO : (cos_u1_cos_u2 * sin_lambda / sin_sigma)
+        cos_sq_alpha = BigMath::ONE - sin_alpha * sin_alpha
+        cos_2_s_m = (cos_sq_alpha == BigMath::ZERO) ? BigMath::ZERO : (cos_sigma - BigMath::TWO * sin_u1_sin_u2 / cos_sq_alpha)
+
+        u_squared = cos_sq_alpha * a_sq_minus_b_sq_over_b_sq
+        _a = BigMath::ONE + (u_squared / 16384.0) *
+               (4096.0 + u_squared *
+                 (-768.0 + u_squared * (320.0 - 175.0 * u_squared)))
+        _b = (u_squared / 1024.0) *
+               (256.0 + u_squared *
+                 (-128.0 + u_squared * (74.0 - 47.0 * u_squared)))
+        _c = (f / 16.0) *
+               cos_sq_alpha *
+               (4.0 + f * (4.0 - 3.0 * cos_sq_alpha))
+        cos2_s_m_sq = cos2_s_m * cos2_s_m
+        delta_sigma = _b * sin_sigma *
+                        (cos2_s_m + (_b / 4.0) *
+                          (cos_sigma * (-1.0 + BigMath::TWO * cos2_s_m_sq) -
+                          (_b / 6.0) * cos2_s_m *
+                          (-3.0 + 4.0 * sin_sigma * sin_sigma) *
+                          (-3.0 + 4.0 * cos2_s_m_sq)))
+
+        _lambda = _l +
+                    (BigMath::ONE - _c) * f * sin_alpha *
+                    (sigma + _c * sin_sigma *
+                      (cos2_s_m + _c * cos_sigma *
+                      (-1.0 + BigMath::TWO * cos2_s_m * cos2_s_m)))
+
+        delta = (_lambda - _lambda_orig) / _lambda
+        if BigMath.abs(delta) < 1.0e-12
+          break
+        end
+      end
+
+      distance = (b * _a * (sigma - delta_sigma))
+      results[0] = distance
+
+      if initial_bearing
+        results[1] = atan2(cos_u2 * sin_lambda, cos_u1 * sin_u2 - sin_u1 * cos_u2 * cos_lambda).to_deg
+      end
+
+      if final_bearing
+        results[2] = atan2(cos_u1 * sin_lambda, -(sin_u1) * cos_u2 + cos_u1 * sin_u2 * cos_lambda).to_deg
+      end
+
+      nil
+    end
 
   end
+
+  class Coordinate < ::Array
+
+    def distance_to obj
+      raise ArgumentError unless Coordinate === obj
+
+      r = []
+      Geodesic.compute_distance_and_bearing y, x, obj.y, obj.x, r
+      { distance: r[0] }
+    end
+
+    def distance_and_bearing_to obj
+      raise ArgumentError unless Coordinate === obj
+
+      r = []
+      Geodesic.compute_distance_and_bearing y, x, obj.y, obj.x, r, true, true
+      { distance: r[0], bearing: { initial: r[1], final: r[2] }}
+    end
+
+  end
+
 end
