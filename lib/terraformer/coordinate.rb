@@ -169,6 +169,17 @@ module Terraformer
       BigMath.sqrt squared_euclidean_distance(other), PRECISION
     end
 
+    def + obj
+      case obj
+      when Array
+        _x = self.x + obj[0] if obj[0]
+        _y = self.y + obj[1] if obj[1]
+        Coordinate.new((_x || x), (_y || y))
+      else
+        raise NotImplementedError
+      end
+    end
+
   end
 
 end
