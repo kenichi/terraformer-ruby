@@ -114,6 +114,10 @@ module Terraformer
       [x, y, z, m].map! {|e| e.to_f if e}.compact.to_json(*args)
     end
 
+    def to_point
+      Point.new self
+    end
+
     def geographic?
       crs.nil? or crs == GEOGRAPHIC_CRS
     end
@@ -164,15 +168,15 @@ module Terraformer
       end
     end
 
-    def squared_euclidean_distance other
-      raise ArgumentError unless Coordinate === other
-      dx = other.x - x
-      dy = other.y - y
-      dx**2 + dy**2
+    def squared_euclidean_distance_to obj
+      raise ArgumentError unless Coordinate === obj
+      dx = obj.x - x
+      dy = obj.y - y
+      dx * dx + dy * dy
     end
 
-    def euclidean_distance other
-      BigMath.sqrt squared_euclidean_distance(other), PRECISION
+    def euclidean_distance_to obj
+      BigMath.sqrt squared_euclidean_distance(obj), PRECISION
     end
 
     def + obj
@@ -184,6 +188,11 @@ module Terraformer
       else
         raise NotImplementedError
       end
+    end
+
+    def distance_and_bearing_to obj
+      raise ArgumentError unless Coordinate === obj
+      Geodesic.compute_distance_and_bearing y, x, obj.y, obj.x
     end
 
   end

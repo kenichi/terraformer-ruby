@@ -7,8 +7,11 @@ module Terraformer
     attr_accessor :coordinates
 
     def initialize *args
-      if args.length > 1 or Array === args[0]
+      case
+      when args.length > 1
         self.coordinates = Coordinate.from_array args
+      when Array === args[0]
+        self.coordinates = Coordinate.from_array args[0]
       else
         super *args do |arg|
           self.coordinates = Coordinate.from_array arg['coordinates']
@@ -29,6 +32,12 @@ module Terraformer
 
     def to_geographic
       self.class.new *coordinates.map_coordinate(&:to_geographic)
+    end
+
+    def to_feature
+      f = Feature.new
+      f.geometry = self
+      f
     end
 
     def first_coordinate

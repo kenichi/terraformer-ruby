@@ -79,6 +79,7 @@ module Terraformer
 end
 
 require 'terraformer/coordinate'
+require 'terraformer/geodesic'
 require 'terraformer/bounds'
 require 'terraformer/geometry'
 require 'terraformer/feature'

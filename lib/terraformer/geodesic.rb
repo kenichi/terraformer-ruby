@@ -1,5 +1,3 @@
-require 'bigdecimal/math'
-
 module Terraformer
 
   class Geodesic
@@ -26,8 +24,7 @@ module Terraformer
 
     # http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
     #
-    def self.compute_distance_and_bearing lat_1, lon_1, lat_2, lon_2, results = [], initial_bearing = false, final_bearing = false
-
+    def self.compute_distance_and_bearing lat_1, lon_1, lat_2, lon_2
       lat_1 = lat_1.to_rad
       lat_2 = lat_2.to_rad
       lon_1 = lon_1.to_rad
@@ -104,38 +101,12 @@ module Terraformer
         end
       end
 
-      distance = (b * _a * (sigma - delta_sigma))
-      results[0] = distance
-
-      if initial_bearing
-        results[1] = atan2(cos_u2 * sin_lambda, cos_u1 * sin_u2 - sin_u1 * cos_u2 * cos_lambda).to_deg
-      end
-
-      if final_bearing
-        results[2] = atan2(cos_u1 * sin_lambda, -(sin_u1) * cos_u2 + cos_u1 * sin_u2 * cos_lambda).to_deg
-      end
-
-      nil
-    end
-
-  end
-
-  class Coordinate < ::Array
-
-    def distance_to obj
-      raise ArgumentError unless Coordinate === obj
-
-      r = []
-      Geodesic.compute_distance_and_bearing y, x, obj.y, obj.x, r
-      { distance: r[0] }
-    end
-
-    def distance_and_bearing_to obj
-      raise ArgumentError unless Coordinate === obj
-
-      r = []
-      Geodesic.compute_distance_and_bearing y, x, obj.y, obj.x, r, true, true
-      { distance: r[0], bearing: { initial: r[1], final: r[2] }}
+      { distance: (b * _a * (sigma - delta_sigma)),
+        bearing: {
+          initial: atan2(cos_u2 * sin_lambda, cos_u1 * sin_u2 - sin_u1 * cos_u2 * cos_lambda).to_deg,
+          final: atan2(cos_u1 * sin_lambda, -(sin_u1) * cos_u2 + cos_u1 * sin_u2 * cos_lambda).to_deg
+        }
+      }
     end
 
   end
