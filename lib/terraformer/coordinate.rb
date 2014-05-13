@@ -4,7 +4,7 @@ module Terraformer
 
     # http://en.wikipedia.org/wiki/Earth_radius#Mean_radius
     #
-    MEAN_RADIUS_EARTH = 6371009.to_d
+    EARTH_MEAN_RADIUS = 6371009.to_d
 
     attr_accessor :crs
 
@@ -111,7 +111,7 @@ module Terraformer
     end
 
     def to_json *args
-      [x, y, z, m].map! {|e| e.nil? ? nil : e.to_f}.compact.to_json(*args)
+      [x, y, z, m].map! {|e| e.to_f if e}.compact.to_json(*args)
     end
 
     def geographic?
@@ -133,8 +133,6 @@ module Terraformer
       Polygon.new(coordinates).to_geographic
     end
 
-    # todo - this is also probably algorithmically bad, fix that sucker
-    #
     def great_circle_distance other
       raise ArgumentError unless Coordinate === other
 
@@ -152,7 +150,7 @@ module Terraformer
       x = BigMath.sqrt (1 - a), PRECISION
       c = 2 * BigMath.atan2(y, x, PRECISION)
 
-      c * MEAN_RADIUS_EARTH
+      c * EARTH_MEAN_RADIUS
     end
 
     def <=> other
