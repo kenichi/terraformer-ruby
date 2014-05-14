@@ -7,6 +7,9 @@ module Terraformer
     attr_accessor :coordinates
 
     def initialize *args
+
+      # todo i don't think this is quite right
+
       case
       when args.length > 1
         self.coordinates = Coordinate.from_array args
