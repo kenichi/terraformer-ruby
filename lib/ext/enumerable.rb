@@ -35,4 +35,13 @@ module Enumerable
     end
   end
 
+  def rotate_until &block
+    return if block[]
+    loop {push shift; break if block[]}
+  end
+
+  def rotate_until_first_equals obj
+    rotate_until { at[0] == obj }
+  end
+
 end

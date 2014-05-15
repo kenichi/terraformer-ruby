@@ -81,7 +81,7 @@ module Terraformer
       self[3]
     end
 
-    [:z=, :m=, :<<, :+ , :-, :*, :&, :|].each do |sym|
+    [:z=, :m=, :<<, :*, :&, :|].each do |sym|
       define_method(sym){|*a| raise NotImplementedError }
     end
 
@@ -137,7 +137,49 @@ module Terraformer
       Polygon.new(coordinates).to_geographic
     end
 
-    def great_circle_distance other
+    def <=> other
+      raise ArgumentError unless Coordinate === other
+      dx = x - other.x
+      dy = y - other.y
+      case
+      when dx > dy; 1
+      when dx < dy; -1
+      else;         0
+      end
+    end
+
+    def arithmetic operator, obj
+      case obj
+      when Array
+        _x = self.x.__send__ operator, obj[0] if obj[0]
+        _y = self.y.__send__ operator, obj[1] if obj[1]
+        Coordinate.new((_x || x), (_y || y))
+      else
+        raise NotImplementedError
+      end
+    end
+    private :arithmetic
+
+    def + obj
+      arithmetic :+, obj
+    end
+
+    def - obj
+      arithmetic :-, obj
+    end
+
+    def squared_euclidean_distance_to obj
+      raise ArgumentError unless Coordinate === obj
+      dx = obj.x - x
+      dy = obj.y - y
+      dx * dx + dy * dy
+    end
+
+    def euclidean_distance_to obj
+      BigMath.sqrt squared_euclidean_distance(obj), PRECISION
+    end
+
+    def haversine_distance_to other
       raise ArgumentError unless Coordinate === other
 
       d_lat = (self.y - other.y).to_rad
@@ -157,42 +199,21 @@ module Terraformer
       c * EARTH_MEAN_RADIUS
     end
 
-    def <=> other
-      raise ArgumentError unless Coordinate === other
-      dx = x - other.x
-      dy = y - other.y
-      case
-      when dx > dy; 1
-      when dx < dy; -1
-      else;         0
-      end
-    end
-
-    def squared_euclidean_distance_to obj
-      raise ArgumentError unless Coordinate === obj
-      dx = obj.x - x
-      dy = obj.y - y
-      dx * dx + dy * dy
-    end
-
-    def euclidean_distance_to obj
-      BigMath.sqrt squared_euclidean_distance(obj), PRECISION
-    end
-
-    def + obj
-      case obj
-      when Array
-        _x = self.x + obj[0] if obj[0]
-        _y = self.y + obj[1] if obj[1]
-        Coordinate.new((_x || x), (_y || y))
-      else
-        raise NotImplementedError
-      end
-    end
-
     def distance_and_bearing_to obj
       raise ArgumentError unless Coordinate === obj
       Geodesic.compute_distance_and_bearing y, x, obj.y, obj.x
+    end
+
+    def distance_to obj
+      distance_and_bearing_to(obj)[:distance]
+    end
+
+    def initial_bearing_to obj
+      distance_and_bearing_to(obj)[:bearing][:initial]
+    end
+
+    def final_bearing_to obj
+      distance_and_bearing_to(obj)[:bearing][:final]
     end
 
   end

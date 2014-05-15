@@ -5,7 +5,7 @@ module Terraformer
 
       def bounds obj, format = :bbox
 
-        obj = Terraformer.parse obj unless Primitive === obj
+        obj = Terraformer.parse obj unless Geometry === obj
 
         bbox = case obj.type
                when 'Point'
