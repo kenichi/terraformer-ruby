@@ -24,6 +24,8 @@ module Terraformer
 
     # http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
     #
+    # ported from https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/location/java/android/location/Location.java
+    #
     def self.compute_distance_and_bearing lat_1, lon_1, lat_2, lon_2
       lat_1 = lat_1.to_rad
       lat_2 = lat_2.to_rad
@@ -96,7 +98,7 @@ module Terraformer
                       (-1.0 + BigMath::TWO * cos2_s_m * cos2_s_m)))
 
         delta = (_lambda - _lambda_orig) / _lambda
-        if BigMath.abs(delta) < 1.0e-12
+        if delta.abs < 1.0e-12
           break
         end
       end

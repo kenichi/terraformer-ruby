@@ -32,8 +32,4 @@ module BigMath
     BigMath.sin(theta, precision) / BigMath.cos(theta, precision)
   end
 
-  def self.abs d
-    d < ZERO ? (d * -1) : d
-  end
-
 end
