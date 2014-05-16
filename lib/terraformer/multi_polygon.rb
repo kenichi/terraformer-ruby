@@ -19,6 +19,23 @@ module Terraformer
       coordinates[0][0][0]
     end
 
+    def polygons
+      coordinates.map {|p| Polygon.new p}
+    end
+
+    def == obj
+      super obj do |o|
+        equal = true
+        ps = polygons.sort
+        ops = o.polygons.sort
+        ps.each_with_index do |p, i|
+          equal = p == ops[i]
+          break unless equal
+        end
+        equal
+      end
+    end
+
   end
 
 end

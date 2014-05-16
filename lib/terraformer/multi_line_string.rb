@@ -19,6 +19,23 @@ module Terraformer
       coordinates[0][0]
     end
 
+    def line_strings
+      coordinates.map {|ls| LineString.new ls}
+    end
+
+    def == obj
+      super obj do |o|
+        equal = true
+        lses = line_strings.sort
+        olses = o.line_strings.sort
+        lses.each_with_index do |ls, i|
+          equal = ls == olses[i]
+          break unless equal
+        end
+        equal
+      end
+    end
+
   end
 
 end

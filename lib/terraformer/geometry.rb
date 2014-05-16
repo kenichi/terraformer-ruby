@@ -94,6 +94,15 @@ module Terraformer
       min_d
     end
 
+    def == obj
+      return false unless obj.class == self.class
+      if block_given?
+        yield obj
+      else
+        self.coordinates == obj.coordinates
+      end
+    end
+
   end
 
   class GeometryCollection < Primitive

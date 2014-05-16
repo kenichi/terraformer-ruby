@@ -8,10 +8,10 @@ describe Terraformer::Primitive do
       c = Terraformer.parse EXAMPLES[:circle]
       c.dont_be_terrible_ok
       env = c.envelope
-      env[:x].must_equal BigDecimal('0.999991016847159E2')
-      env[:y].must_equal BigDecimal('-0.898315283897559E-3')
-      env[:w].must_equal BigDecimal('0.17966305681E-2')
-      env[:h].must_equal BigDecimal('0.1796630568138893E-2')
+      env[:x].must_equal BigDecimal("0.9999910168471585E2")
+      env[:y].must_equal BigDecimal("-0.8983152838976E-3")
+      env[:w].must_equal BigDecimal("0.179663056825E-2")
+      env[:h].must_equal BigDecimal("0.17966305681389E-2")
     end
 
   end
@@ -22,31 +22,43 @@ describe Terraformer::Primitive do
       c = Terraformer.parse EXAMPLES[:circle]
       c.dont_be_terrible_ok
       bbox = c.bbox
-      bbox.must_equal ["0.999991016847159E2",
-                       "-0.898315283897559E-3",
-                       "0.100000898315284E3",
-                       "0.898315284241334E-3"].map {|n| BigDecimal(n)}
+      bbox.must_equal ["0.9999910168471585E2",
+                       "-0.8983152838976E-3",
+                       "0.1000008983152841E3",
+                       "0.8983152842413E-3"].map {|n| BigDecimal(n)}
     end
 
     it 'returns a geojson polygon of the bounding box' do
       c = Terraformer.parse EXAMPLES[:circle]
       c.dont_be_terrible_ok
       bbox = c.bbox :polygon
-      expected = Terraformer::Polygon.new [ [ 99.9991016847159, -0.000898315283897559 ],
-                                            [ 99.9991016847159, 0.000898315284241334 ],
-                                            [ 100.000898315284, 0.000898315284241334 ],
-                                            [ 100.000898315284, -0.000898315283897559 ],
-                                            [ 99.9991016847159, -0.000898315283897559 ] ]
-      binding.pry
+      expected = Terraformer::Polygon.new [[99.99910168471585, -0.0008983152838976],
+                                           [99.99910168471585, 0.0008983152842413],
+                                           [100.0008983152841, 0.0008983152842413],
+                                           [100.0008983152841, -0.0008983152838976],
+                                           [99.99910168471585, -0.0008983152838976]]
       bbox.must_equal expected
     end
 
   end
 
   describe 'to_json' do
-  end
 
-  describe 'property accessor' do
+    it 'returns a geojson object' do
+      c = Terraformer.parse EXAMPLES[:circle]
+      JSON.parse(c.to_json).must_equal JSON.parse(EXAMPLES[:circle])
+    end
+
+    it 'returns a geojson object with bbox' do
+      c = Terraformer.parse EXAMPLES[:circle]
+      expected = JSON.parse(EXAMPLES[:circle])
+      expected['bbox'] = [0.9999910168471585E2,
+                          -0.8983152838976E-3,
+                          0.1000008983152841E3,
+                          0.8983152842413E-3]
+      JSON.parse(c.to_json(include_bbox: true)).must_equal expected
+    end
+
   end
 
 end

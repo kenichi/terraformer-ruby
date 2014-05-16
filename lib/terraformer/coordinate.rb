@@ -21,11 +21,13 @@ module Terraformer
       def big_decimal n
         case n
         when String
-          BigDecimal.new n
+          BigDecimal(n)
         when BigDecimal
           n
         when Numeric
-          n.to_d
+          BigDecimal(n.to_s)
+        else
+          raise ArgumentError
         end
       end
 
@@ -39,19 +41,15 @@ module Terraformer
 
     def initialize _x, _y = nil, _z = nil, _m = nil
       super 4
-      case _x
-      when Array
+      case
+      when Array === _x
         raise ArgumentError if _y
         self.x = _x[0]
         self.y = _x[1]
-      when Numeric
+      when Numeric === _x || String === _x
         raise ArgumentError unless _y
         self.x = _x
         self.y = _y
-      when String
-        raise ArgumentError unless _y
-        self.x = BigDecimal(_x)
-        self.y = BigDecimal(_y)
       else
         raise ArgumentError.new "invalid argument: #{_x}"
       end
@@ -92,7 +90,7 @@ module Terraformer
         (Math::PI / 2).to_d -
         (2 * BigMath.atan(BigMath.exp(-1.0 * y / EARTH_RADIUS, PRECISION), PRECISION))
       ).to_deg
-      geog = self.class.new _x, _y
+      geog = self.class.new _x.round(PRECISION), _y.round(PRECISION)
       geog.crs = GEOGRAPHIC_CRS
       geog
     end
@@ -101,7 +99,7 @@ module Terraformer
       _x = x.to_rad * EARTH_RADIUS
       syr = BigMath.sin y.to_rad, PRECISION
       _y = (EARTH_RADIUS / 2.0) * BigMath.log((1.0 + syr) / (1.0 - syr), PRECISION)
-      merc = self.class.new _x, _y
+      merc = self.class.new _x.round(PRECISION), _y.round(PRECISION)
       merc.crs = MERCATOR_CRS
       merc
     end

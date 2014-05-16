@@ -67,11 +67,18 @@ module Terraformer
     end
 
     def to_json *args
-      self.to_hash.to_json *args
+      h = self.to_hash
+      h[:bbox] = bbox if Hash === args.last and args.pop[:include_bbox]
+      h.to_json *args
     end
 
-    def [] prop
-      self.__send__ prop.to_sym
+  end
+
+  # yikes!
+  module BBox
+
+    def to_json *args
+      map(&:to_f).to_json *args
     end
 
   end

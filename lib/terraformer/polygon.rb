@@ -21,6 +21,28 @@ module Terraformer
       coordinates[0][0]
     end
 
+    def == obj
+      super obj do |o|
+
+        equal = true
+
+        # first check outer polygon
+        equal = self.coordinates[0].polygonally_equal_to? obj.coordinates[0]
+
+
+        # then inner polygons (holes)
+        #
+        if equal and obj.coordinates.length > 1
+          1.upto(obj.coordinates.length - 1) do |i|
+            equal = self.coordinates[i].polygonally_equal_to? obj.coordinates[i]
+            break unless equal
+          end
+        end
+
+        equal
+      end
+    end
+
   end
 
 end

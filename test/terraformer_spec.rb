@@ -132,6 +132,20 @@ describe Terraformer do
       JSON.parse(c.to_json).must_equal JSON.parse(EXAMPLES[:circle])
     end
 
+    it 'rounds buffered vertices to PRECISION' do
+      p = Terraformer.parse EXAMPLES[:point]
+      p.dont_be_terrible_ok
+      c = p.coordinates.buffer 100
+      splitter = ->(d) {
+        a = d.split
+        a[1][a[3]..-1].length
+      }
+      c.coordinates.each_coordinate do |c|
+        splitter[c.x].must_be :<=, Terraformer::PRECISION
+        splitter[c.x].must_be :<=, Terraformer::PRECISION
+      end
+    end
+
   end
 
 end
