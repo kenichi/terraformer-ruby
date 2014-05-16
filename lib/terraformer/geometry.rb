@@ -62,7 +62,7 @@ module Terraformer
     end
 
     def convex_hull
-      raise NotImplementedError
+      ConvexHull.for coordinates
     end
 
     def contains other

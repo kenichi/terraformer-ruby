@@ -31,12 +31,6 @@ module Terraformer
         end
       end
 
-      # http://tixxit.wordpress.com/2009/12/09/jarvis-march
-      #
-      def turn p, q, r
-        ((q[0] - p[0]) * (r[1] - p[1]) - (r[0] - p[0]) * (q[1] - p[1])) <=> 0
-      end
-
     end
 
     def initialize _x, _y = nil, _z = nil, _m = nil
@@ -174,7 +168,7 @@ module Terraformer
     end
 
     def euclidean_distance_to obj
-      BigMath.sqrt squared_euclidean_distance(obj), PRECISION
+      BigMath.sqrt squared_euclidean_distance_to(obj), PRECISION
     end
 
     def haversine_distance_to other
