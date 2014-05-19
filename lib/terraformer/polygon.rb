@@ -11,6 +11,10 @@ module Terraformer
       else
         super *args
       end
+
+      if line_strings.map(&:linear_ring?).include? false
+        raise ArgumentError.new 'not linear ring'
+      end
     end
 
     def has_holes?
@@ -41,6 +45,10 @@ module Terraformer
 
         equal
       end
+    end
+
+    def line_strings
+      coordinates.map {|lr| LineString.new lr}
     end
 
   end

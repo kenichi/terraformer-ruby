@@ -128,6 +128,10 @@ module Terraformer
       }
     end
 
+    def convex_hull
+      ConvexHull.for geometries.map &:coordinates
+    end
+
   end
 
 end

@@ -1,5 +1,6 @@
 module BigMath
 
+  N_ONE = -1.to_d
   ZERO = 0.to_d
   ONE = 1.to_d
   TWO = 2.to_d

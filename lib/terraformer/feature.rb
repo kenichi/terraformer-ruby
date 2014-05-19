@@ -1,9 +1,12 @@
 module Terraformer
 
   class Feature < Primitive
+    extend Forwardable
 
     attr_accessor :id, :geometry
     attr_writer :properties
+
+    def_delegator :@geometry, :convex_hull
 
     def initialize *args
       unless args.empty?
@@ -52,11 +55,20 @@ module Terraformer
       @features ||= []
     end
 
+    def << feature
+      raise ArgumentError unless Feature === feature
+      features << feature
+    end
+
     def to_hash
       {
         type: type,
         features: features.map(&:to_hash)
       }
+    end
+
+    def convex_hull
+      ConvexHull.for features.map(&:geometry).map(&:coordinates)
     end
 
   end

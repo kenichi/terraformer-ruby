@@ -5,6 +5,8 @@ require 'bigdecimal/util'
 require 'ext/big_decimal'
 require 'ext/big_math'
 require 'ext/enumerable'
+require 'ext/hash'
+require 'forwardable'
 
 module Terraformer
 

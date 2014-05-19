@@ -86,7 +86,7 @@ module Terraformer
         cos2_s_m_sq = cos2_s_m * cos2_s_m
         delta_sigma = _b * sin_sigma *
                         (cos2_s_m + (_b / 4.0) *
-                          (cos_sigma * (-1.0 + BigMath::TWO * cos2_s_m_sq) -
+                          (cos_sigma * (BigMath::N_ONE + BigMath::TWO * cos2_s_m_sq) -
                           (_b / 6.0) * cos2_s_m *
                           (-3.0 + 4.0 * sin_sigma * sin_sigma) *
                           (-3.0 + 4.0 * cos2_s_m_sq)))
@@ -95,7 +95,7 @@ module Terraformer
                     (BigMath::ONE - _c) * f * sin_alpha *
                     (sigma + _c * sin_sigma *
                       (cos2_s_m + _c * cos_sigma *
-                      (-1.0 + BigMath::TWO * cos2_s_m * cos2_s_m)))
+                      (BigMath::N_ONE + BigMath::TWO * cos2_s_m * cos2_s_m)))
 
         delta = (_lambda - _lambda_orig) / _lambda
         if delta.abs < 1.0e-12

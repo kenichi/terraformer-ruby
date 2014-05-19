@@ -21,9 +21,11 @@ describe Terraformer do
       p.dont_be_terrible_ok
       p.type.must_equal 'MultiPoint'
       p.coordinates.must_be_instance_of Array
-      p.coordinates.length.must_equal 2
+      p.coordinates.length.must_equal 4
       p.coordinates[0].must_equal Terraformer::Coordinate.new 100, 0
       p.coordinates[1].must_equal Terraformer::Coordinate.new 101, 1
+      p.coordinates[2].must_equal Terraformer::Coordinate.new 100, 1
+      p.coordinates[3].must_equal Terraformer::Coordinate.new 99, 0
     end
 
     it 'parses line strings' do
@@ -31,9 +33,11 @@ describe Terraformer do
       p.dont_be_terrible_ok
       p.type.must_equal 'LineString'
       p.coordinates.must_be_instance_of Array
-      p.coordinates.length.must_equal 2
+      p.coordinates.length.must_equal 4
       p.coordinates[0].must_equal Terraformer::Coordinate.new 100, 0
       p.coordinates[1].must_equal Terraformer::Coordinate.new 101, 1
+      p.coordinates[2].must_equal Terraformer::Coordinate.new 100, 1
+      p.coordinates[3].must_equal Terraformer::Coordinate.new 99, 0
     end
 
     it 'parses multi line strings' do

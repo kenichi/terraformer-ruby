@@ -6,4 +6,5 @@ group :test do
   gem 'http'
   gem 'pry'
   gem 'pry-nav'
+  gem 'ruby-prof'
 end
