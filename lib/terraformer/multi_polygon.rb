@@ -20,7 +20,7 @@ module Terraformer
     end
 
     def polygons
-      coordinates.map {|p| Polygon.new p}
+      coordinates.map {|p| Polygon.new *p}
     end
 
     def == obj
