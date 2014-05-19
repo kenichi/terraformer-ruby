@@ -152,4 +152,26 @@ describe Terraformer do
 
   end
 
+  describe 'coordinates_contain_point?' do
+
+    it 'returns true when point is in coordinates' do
+      coordinates = [[10,10],[20,10],[20,20],[10,20],[10,10]]
+      point = [15,15]
+      Terraformer.coordinates_contain_point?(coordinates, point).must_equal true
+    end
+
+    it 'returns false when point is not in coordinates' do
+      coordinates = [[10,10],[20,10],[20,20],[10,20],[10,10]]
+      point = [25,25]
+      Terraformer.coordinates_contain_point?(coordinates, point).must_equal false
+    end
+
+    it 'returns true when point is on edge of coordinates' do
+      coordinates = [[10,10],[20,10],[20,20],[10,20],[10,10]]
+      point = [15,10]
+      Terraformer.coordinates_contain_point?(coordinates, point).must_equal true
+    end
+
+  end
+
 end
