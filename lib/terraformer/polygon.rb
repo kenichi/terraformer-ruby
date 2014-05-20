@@ -90,7 +90,7 @@ module Terraformer
           within = !Geometry.multi_array_intersects_multi_array?(coordinates, obj.coordinates)
         end
       when MultiPolygon
-        obj.polygons.any? {|p| p.within? self}
+        within = obj.polygons.any? {|p| p.within? self}
       else
         raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"
       end

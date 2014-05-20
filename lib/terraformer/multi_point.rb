@@ -25,6 +25,25 @@ module Terraformer
       end
     end
 
+    def contains? obj
+      points.any? {|p| p.contains? obj}
+    end
+
+    def within? obj
+      within = false
+      case obj
+      when MultiPoint || LineString || MultiLineString
+        points.all? {|p| obj.contains? p}
+      when Polygon
+        obj.contains? self
+      when MultiPolygon
+        points.all? {|p| obj.polygons.any? {|polygon| polygon.contains? p}}
+      else
+        raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"
+      end
+      within
+    end
+
   end
 
 end

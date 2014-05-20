@@ -36,6 +36,34 @@ module Terraformer
       end
     end
 
+    def contains? obj
+      case obj
+      when Point
+        line_strings.any? {|ls| ls.contains? obj}
+      when MultiPoint
+        obj.points.all? {|p| line_strings.any? {|ls| ls.contains? p}}
+      when LineString
+        line_strings.any? {|ls| ls == obj or ls.coordinates.slice_exists? obj.coordinates}
+      when MultiLineString
+        obj.line_strings.all? do |ols|
+          line_strings.any? do |ls|
+            ls == ols or ls.coordinates.slice_exists? ols.coordinates
+          end
+        end
+      else
+        raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"
+      end
+    end
+
+    def within? obj
+      case obj
+      when MultiLineString || Polygon || MultiPolygon
+        obj.contains? self
+      else
+        raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"
+      end
+    end
+
   end
 
 end

@@ -27,6 +27,15 @@ module Terraformer
       distance_and_bearing_to(obj)[:bearing][:final]
     end
 
+    def contains? obj
+      case obj
+      when Point
+        self == obj
+      else
+        raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"
+      end
+    end
+
     def within? obj
       within = false
       case obj
