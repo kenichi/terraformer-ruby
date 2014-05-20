@@ -1,6 +1,9 @@
+require 'terraformer/geometry/class_methods'
+
 module Terraformer
 
   class Geometry < Primitive
+    extend Terraformer::Geometry::ClassMethods
 
     MULTI_REGEX = /^Multi/
 
@@ -65,15 +68,15 @@ module Terraformer
       ConvexHull.for coordinates
     end
 
-    def contains other
+    def contains? other
       raise NotImplementedError
     end
 
-    def within other
+    def within? other
       raise NotImplementedError
     end
 
-    def intersects other
+    def intersects? other
       raise NotImplementedError
     end
 
