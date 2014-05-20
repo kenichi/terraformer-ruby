@@ -51,6 +51,52 @@ module Terraformer
       coordinates.map {|lr| LineString.new lr}
     end
 
+    def holes
+      return nil unless has_holes?
+      coordinates[1..-1].map {|hole| Polygon.new hole}
+    end
+
+    def contains? obj
+      obj = Coordinate.new obj if Array === obj and Numeric === obj[0]
+      obj = obj.to_point if Coordinate === obj
+      contained = false
+      case obj
+      when Point
+        contained = Geometry.coordinates_contain_point? coordinates[0], obj.coordinates
+        contained = !holes.any? {|h| h.contains? obj} if contained and has_holes?
+      when MultiPoint
+        contained = obj.points.all? {|p| contains? p}
+      when LineString
+        contained = contains?(obj.first_coordinate) && !Geometry.array_intersects_multi_array?(obj.coordinates, coordinates)
+      when MultiLineString
+        contained = obj.line_strings.all? {|ls| contains? ls}
+      when Polygon
+        contained = obj.within? self
+      when MultiPolygon
+        contained = obj.polygons.all? {|p| p.within? self}
+      else
+        raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"
+      end
+      contained
+    end
+
+    def within? obj
+      within = false
+      case obj
+      when Polygon
+        if self == obj
+          within = true
+        elsif obj.contains? first_coordinate
+          within = !Geometry.multi_array_intersects_multi_array?(coordinates, obj.coordinates)
+        end
+      when MultiPolygon
+        obj.polygons.any? {|p| p.within? self}
+      else
+        raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"
+      end
+      within
+    end
+
   end
 
 end

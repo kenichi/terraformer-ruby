@@ -27,6 +27,30 @@ module Terraformer
       distance_and_bearing_to(obj)[:bearing][:final]
     end
 
+    def within? obj
+      within = false
+      case obj
+      when Point
+        within = self == obj
+      when MultiPoint || LineString
+        obj.each_coordinate do |c|
+          if self == c
+            within = true
+            break
+          end
+        end
+      when MultiLineString
+        within = obj.line_strings.any? {|ls| within? ls}
+      when Polygon
+        within = obj.contains? self
+      when MultiPolygon
+        within = obj.polygons.any? {|p| p.contains? self}
+      else
+        raise ArgumentError unless Geometry === obj
+      end
+      within
+    end
+
   end
 
 end
