@@ -33,8 +33,8 @@ module Terraformer
 
     end
 
-    def initialize _x, _y = nil, _z = nil, _m = nil
-      super 4
+    def initialize _x, _y = nil, _z = nil
+      super 3
       case
       when Array === _x
         raise ArgumentError if _y
@@ -69,11 +69,7 @@ module Terraformer
       self[2]
     end
 
-    def m
-      self[3]
-    end
-
-    [:z=, :m=, :<<, :*, :&, :|].each do |sym|
+    [:z=, :<<, :*, :&, :|].each do |sym|
       define_method(sym){|*a| raise NotImplementedError }
     end
 
@@ -103,7 +99,7 @@ module Terraformer
     end
 
     def to_json *args
-      [x, y, z, m].map! {|e| e.to_f if e}.compact.to_json(*args)
+      [x, y, z].map! {|e| e.to_f if e}.compact.to_json(*args)
     end
 
     def to_point

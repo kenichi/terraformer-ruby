@@ -81,7 +81,7 @@ module Terraformer
   module BBox
 
     def to_json *args
-      map(&:to_f).to_json *args
+      map {|e| e.to_f if e}.to_json *args
     end
 
   end
