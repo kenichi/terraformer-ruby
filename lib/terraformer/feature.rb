@@ -43,6 +43,13 @@ module Terraformer
 
     attr_writer :features
 
+    def self.with_features *f
+      raise ArgumentError unless f.all? {|e| Feature === e}
+      fc = FeatureCollection.new
+      fc.features = f
+      fc
+    end
+
     def initialize *args
       unless args.empty?
         super *args do |arg|

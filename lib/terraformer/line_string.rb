@@ -1,4 +1,4 @@
-
+module Terraformer
 
   class LineString < Geometry
 
