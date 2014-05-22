@@ -37,27 +37,22 @@ module Terraformer
     end
 
     def within? obj
-      within = false
       case obj
       when Point
-        within = self == obj
-      when MultiPoint || LineString
-        obj.each_coordinate do |c|
-          if self == c
-            within = true
-            break
-          end
-        end
+        self == obj
+      when MultiPoint
+        obj.coordinates.any? {|c| self.coordinates == c}
+      when LineString
+        obj.coordinates.any? {|c| self.coordinates == c}
       when MultiLineString
-        within = obj.line_strings.any? {|ls| within? ls}
+        obj.line_strings.any? {|ls| within? ls}
       when Polygon
-        within = obj.contains? self
+        obj.contains? self
       when MultiPolygon
-        within = obj.polygons.any? {|p| p.contains? self}
+        obj.polygons.any? {|p| p.contains? self}
       else
         raise ArgumentError unless Geometry === obj
       end
-      within
     end
 
   end

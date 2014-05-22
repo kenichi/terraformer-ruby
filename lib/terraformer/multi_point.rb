@@ -30,9 +30,12 @@ module Terraformer
     end
 
     def within? obj
-      within = false
       case obj
-      when MultiPoint || LineString || MultiLineString
+      when MultiPoint
+        points.all? {|p| obj.contains? p}
+      when LineString
+        points.all? {|p| obj.contains? p}
+      when MultiLineString
         points.all? {|p| obj.contains? p}
       when Polygon
         obj.contains? self
@@ -41,7 +44,6 @@ module Terraformer
       else
         raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"
       end
-      within
     end
 
   end

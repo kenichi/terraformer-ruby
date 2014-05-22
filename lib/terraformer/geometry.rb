@@ -90,23 +90,6 @@ module Terraformer
       Terraformer::Geometry.arrays_intersect_arrays? coordinates, other.coordinates
     end
 
-    # todo - this is algorithmically bad, fix it
-    #
-    def great_circle_distance other
-      min_d = nil
-      self.coordinates.each_coordinate do |my_c|
-        other.coordinates.each_coordinate do |other_c|
-          d = my_c.great_circle_distance other_c
-          if min_d.nil?
-            min_d = d
-          elsif d < min_d
-            min_d = d
-          end
-        end
-      end
-      min_d
-    end
-
     def == obj
       return false unless obj.class == self.class
       if block_given?

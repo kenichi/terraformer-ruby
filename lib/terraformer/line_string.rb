@@ -12,6 +12,8 @@ module Terraformer
 
     def contains? obj
       case obj
+      when Point
+        coordinates.any? {|c| c == obj.coordinates}
       when LineString
         self == obj or coordinates.slice_exists? obj.coordinates
       when MultiLineString
@@ -35,6 +37,16 @@ module Terraformer
         raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"
       end
     end
+
+    def points
+      coordinates.map &:to_point
+    end
+    alias_method :vertices, :points
+
+    def point_at idx
+      coordinates[idx].to_point
+    end
+    alias_method :vertex_at, :point_at
 
   end
 

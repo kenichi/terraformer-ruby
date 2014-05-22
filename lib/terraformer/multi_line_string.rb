@@ -57,7 +57,11 @@ module Terraformer
 
     def within? obj
       case obj
-      when MultiLineString || Polygon || MultiPolygon
+      when MultiLineString
+        obj.contains? self
+      when Polygon
+        obj.contains? self
+      when MultiPolygon
         obj.contains? self
       else
         raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"

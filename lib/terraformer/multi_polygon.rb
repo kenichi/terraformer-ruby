@@ -41,16 +41,14 @@ module Terraformer
     end
 
     def within? obj
-      within = false
       case obj
       when Polygon
-        within = polygons.all? {|p| p.within? obj}
+        polygons.all? {|p| p.within? obj}
       when MultiPolygon
-        within = polygons.all? {|p| obj.polygons.any? {|op| op.contains? p}}
+        polygons.all? {|p| obj.polygons.any? {|op| op.contains? p}}
       else
         raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"
       end
-      within
     end
 
   end

@@ -81,20 +81,18 @@ module Terraformer
     end
 
     def within? obj
-      within = false
       case obj
       when Polygon
         if self == obj
-          within = true
+          true
         elsif obj.contains? first_coordinate
-          within = !Geometry.multi_array_intersects_multi_array?(coordinates, obj.coordinates)
+          !Geometry.arrays_intersect_arrays?(coordinates, obj.coordinates)
         end
       when MultiPolygon
-        within = obj.polygons.any? {|p| p.within? self}
+        obj.polygons.any? {|p| p.contains? self}
       else
         raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"
       end
-      within
     end
 
   end

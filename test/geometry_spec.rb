@@ -192,15 +192,15 @@ describe Terraformer::Geometry do
     it 'returns true for intersecting line strings' do
       a = Terraformer::LineString.new [[0,0], [2,2]]
       b = Terraformer::LineString.new [[0,2], [2,0]]
-      a.intersects?(b).must_equal true
-      b.intersects?(a).must_equal true
+      assert a.intersects? b
+      assert b.intersects? a
     end
 
     it 'returns true for intersecting line string and multi line string' do
       a = Terraformer::LineString.new [[0,0], [2,2]]
       b = Terraformer::MultiLineString.new [[[0,2], [2,0]], [[3,0], [3,3]]]
-      a.intersects?(b).must_equal true
-      b.intersects?(a).must_equal true
+      assert a.intersects? b
+      assert b.intersects? a
     end
 
     it 'returns true for intersecting line string and polygon' do
@@ -222,8 +222,8 @@ describe Terraformer::Geometry do
         ]
       }'
       b = PARSED_EXAMPLES[:circle]
-      a.intersects?(b).must_equal true
-      b.intersects?(a).must_equal true
+      assert a.intersects? b
+      assert b.intersects? a
     end
 
     it 'returns true for intersecting line string and multi polygon' do
@@ -249,8 +249,8 @@ describe Terraformer::Geometry do
         ]
       }'
       b = PARSED_EXAMPLES[:sf_county]
-      a.intersects?(b).must_equal true
-      b.intersects?(a).must_equal true
+      assert a.intersects? b
+      assert b.intersects? a
     end
 
     it 'returns true for intersecting multi line strings' do
@@ -336,8 +336,8 @@ describe Terraformer::Geometry do
           ]
         ]
       }'
-      a.intersects?(b).must_equal true
-      b.intersects?(a).must_equal true
+      assert a.intersects? b
+      assert b.intersects? a
     end
 
     it 'returns true for intersecting multi line string and polygon' do
@@ -417,8 +417,8 @@ describe Terraformer::Geometry do
           ]
         ]
       }'
-      a.intersects?(b).must_equal true
-      b.intersects?(a).must_equal true
+      assert a.intersects? b
+      assert b.intersects? a
     end
 
     it 'returns true for intersecting multi line string and multi polygon' do
@@ -522,8 +522,8 @@ describe Terraformer::Geometry do
         ]
         ]
       }'
-      a.intersects?(b).must_equal true
-      b.intersects?(a).must_equal true
+      assert a.intersects? b
+      assert b.intersects? a
     end
 
     it 'returns true for intersecting polygons' do
@@ -581,8 +581,8 @@ describe Terraformer::Geometry do
           ]
         ]
       }'
-      a.intersects?(b).must_equal true
-      b.intersects?(a).must_equal true
+      assert a.intersects? b
+      assert b.intersects? a
     end
 
     it 'returns true for intersecting polygon and multi polygon' do
@@ -666,8 +666,8 @@ describe Terraformer::Geometry do
         ]
           ]
       }'
-      a.intersects?(b).must_equal true
-      b.intersects?(a).must_equal true
+      assert a.intersects? b
+      assert b.intersects? a
     end
 
     it 'returns true for intersecting multi polygons' do
@@ -779,8 +779,248 @@ describe Terraformer::Geometry do
         ]
           ]
       }'
-      a.intersects?(b).must_equal true
-      b.intersects?(a).must_equal true
+      assert a.intersects? b
+      assert b.intersects? a
+    end
+
+    it 'returns false for non-intersecting line strings' do
+      a = Terraformer::LineString.new [[0,0],[8,8]]
+      b = Terraformer::LineString.new [[-1,-1],[-8,-8]]
+      refute a.intersects?(b)
+    end
+
+    it 'returns false for non-intersecting polygons' do
+      refute PARSED_EXAMPLES[:circle].intersects? PARSED_EXAMPLES[:sf_county]
+    end
+
+    # todo more false tests
+
+  end
+
+  describe 'contains?' do
+
+    it 'raises on unsupported types' do
+      ->{ PARSED_EXAMPLES[:point].contains? PARSED_EXAMPLES[:polygon] }.must_raise ArgumentError
+      ->{ PARSED_EXAMPLES[:multi_point].contains? PARSED_EXAMPLES[:polygon] }.must_raise ArgumentError
+      ->{ PARSED_EXAMPLES[:line_string].contains? PARSED_EXAMPLES[:polygon] }.must_raise ArgumentError
+      ->{ PARSED_EXAMPLES[:multi_line_string].contains? PARSED_EXAMPLES[:polygon] }.must_raise ArgumentError
+      # todo more?
+    end
+
+    it 'returns true for line strings that contain points' do
+      ls = PARSED_EXAMPLES[:line_string]
+      assert ls.contains? ls.point_at(1)
+    end
+
+    it 'returns true for multi line strings that contain points' do
+      mls = PARSED_EXAMPLES[:multi_line_string]
+      assert mls.contains? mls.line_strings[0].point_at(1)
+    end
+
+    it 'returns true for polygons that contain points' do
+      p = Terraformer.parse '{
+        "type": "Point",
+        "coordinates": [
+          100.56060791015624,
+          0.6783899107121523
+        ]
+      }'
+      assert PARSED_EXAMPLES[:polygon].contains? p
+    end
+
+    it 'returns true for polygons that contain polygons' do
+      pwh = PARSED_EXAMPLES[:polygon_with_holes]
+      p1 = Terraformer::Polygon.new pwh.line_strings[0].coordinates
+      p2 = pwh.holes[0]
+      assert p1.contains? p2
+      refute p2.contains? p1
+    end
+
+    it 'returns true for multi polygons that contain polygons' do
+      p = Terraformer.parse '{
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              102.3101806640625,
+              2.2625953010152453
+            ],
+            [
+              102.3101806640625,
+              2.6632250332728296
+            ],
+            [
+              102.83752441406249,
+              2.6632250332728296
+            ],
+            [
+              102.83752441406249,
+              2.2625953010152453
+            ],
+            [
+              102.3101806640625,
+              2.2625953010152453
+            ]
+          ]
+        ]
+      }'
+      assert PARSED_EXAMPLES[:multi_polygon].contains? p
+    end
+
+    it 'returns false for polygons with holes and point inside hole' do
+      p = Terraformer.parse '{
+        "type": "Point",
+        "coordinates": [
+          100.5194091796875,
+          0.6028636315576017
+        ]
+      }'
+      refute PARSED_EXAMPLES[:polygon_with_holes].contains? p
+    end
+
+    it 'returns false for polygons with holes and polygon inside hole' do
+      p = Terraformer.parse '{
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              100.40130615234375,
+              0.42159653727164975
+            ],
+            [
+              100.40130615234375,
+              0.6509259386918139
+            ],
+            [
+              100.6842041015625,
+              0.6509259386918139
+            ],
+            [
+              100.6842041015625,
+              0.42159653727164975
+            ],
+            [
+              100.40130615234375,
+              0.42159653727164975
+            ]
+          ]
+        ]
+      }'
+      refute PARSED_EXAMPLES[:polygon_with_holes].contains? p
+    end
+
+  end
+
+  describe 'within?' do
+
+    it 'raises on unsupported types' do
+      ->{ PARSED_EXAMPLES[:polygon].within? PARSED_EXAMPLES[:point] }.must_raise ArgumentError
+      ->{ PARSED_EXAMPLES[:polygon].within? PARSED_EXAMPLES[:multi_point] }.must_raise ArgumentError
+      ->{ PARSED_EXAMPLES[:polygon].within? PARSED_EXAMPLES[:line_string] }.must_raise ArgumentError
+      ->{ PARSED_EXAMPLES[:polygon].within? PARSED_EXAMPLES[:multi_line_string] }.must_raise ArgumentError
+      # todo more?
+    end
+
+    it 'returns true for points within line strings' do
+      ls = PARSED_EXAMPLES[:line_string]
+      assert ls.point_at(1).within? ls
+    end
+
+    it 'returns true for points within multi line strings' do
+      mls = PARSED_EXAMPLES[:multi_line_string]
+      assert mls.line_strings[0].point_at(1).within? mls
+    end
+
+    it 'returns true for points within polygons' do
+      p = Terraformer.parse '{
+        "type": "Point",
+        "coordinates": [
+          100.56060791015624,
+          0.6783899107121523
+        ]
+      }'
+      assert p.within? PARSED_EXAMPLES[:polygon]
+    end
+
+    it 'returns true for polygons within polygons' do
+      pwh = PARSED_EXAMPLES[:polygon_with_holes]
+      p1 = Terraformer::Polygon.new pwh.line_strings[0].coordinates
+      p2 = pwh.holes[0]
+      assert p2.within? p1
+      refute p1.within? p2
+    end
+
+    it 'returns true for polygons within multi polygons' do
+      p = Terraformer.parse '{
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              102.3101806640625,
+              2.2625953010152453
+            ],
+            [
+              102.3101806640625,
+              2.6632250332728296
+            ],
+            [
+              102.83752441406249,
+              2.6632250332728296
+            ],
+            [
+              102.83752441406249,
+              2.2625953010152453
+            ],
+            [
+              102.3101806640625,
+              2.2625953010152453
+            ]
+          ]
+        ]
+      }'
+      assert p.within? PARSED_EXAMPLES[:multi_polygon]
+    end
+
+    it 'returns false for points within the hole of polygons with holes' do
+      p = Terraformer.parse '{
+        "type": "Point",
+        "coordinates": [
+          100.5194091796875,
+          0.6028636315576017
+        ]
+      }'
+      refute p.within? PARSED_EXAMPLES[:polygon_with_holes]
+    end
+
+    it 'returns false for polygons withing the hole of polygons with holes' do
+      p = Terraformer.parse '{
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              100.40130615234375,
+              0.42159653727164975
+            ],
+            [
+              100.40130615234375,
+              0.6509259386918139
+            ],
+            [
+              100.6842041015625,
+              0.6509259386918139
+            ],
+            [
+              100.6842041015625,
+              0.42159653727164975
+            ],
+            [
+              100.40130615234375,
+              0.42159653727164975
+            ]
+          ]
+        ]
+      }'
+      refute p.within? PARSED_EXAMPLES[:polygon_with_holes]
     end
 
   end
