@@ -1,4 +1,4 @@
-module Terraformer
+
 
   class LineString < Geometry
 
@@ -47,6 +47,29 @@ module Terraformer
       coordinates[idx].to_point
     end
     alias_method :vertex_at, :point_at
+
+    def add_vertex p
+      p = p.coordinates if Point === p
+      raise ArgumentError unless Coordinate === p
+      coordinates << p
+    end
+    alias_method :<<, :add_vertex
+
+    def insert_vertex idx, p
+      p = p.coordinates if Point === p
+      raise ArgumentError unless Coordinate === p
+      coordinates.insert idx, p
+    end
+
+    def remove_vertex p
+      p = p.coordinates if Point === p
+      raise ArgumentError unless Coordinate === p
+      coordinates.delete p
+    end
+
+    def remove_vertex_at idx
+      coordinates.delete_at idx
+    end
 
   end
 

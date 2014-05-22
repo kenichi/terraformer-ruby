@@ -95,6 +95,27 @@ module Terraformer
       end
     end
 
+    def add_vertex p
+      insert_vertex coordinates[0].length - 2, p
+    end
+    alias_method :<<, :add_vertex
+
+    def insert_vertex idx, p
+      p = p.coordinates if Point === p
+      raise ArgumentError unless Coordinate === p
+      coordinates[0].insert idx, p
+    end
+
+    def remove_vertex p
+      p = p.coordinates if Point === p
+      raise ArgumentError unless Coordinate === p
+      coordinates[0].delete p
+    end
+
+    def remove_vertex_at idx
+      coordinates[0].delete_at idx
+    end
+
   end
 
 end

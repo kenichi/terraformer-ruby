@@ -992,7 +992,7 @@ describe Terraformer::Geometry do
       refute p.within? PARSED_EXAMPLES[:polygon_with_holes]
     end
 
-    it 'returns false for polygons withing the hole of polygons with holes' do
+    it 'returns false for polygons within the hole of polygons with holes' do
       p = Terraformer.parse '{
         "type": "Polygon",
         "coordinates": [
