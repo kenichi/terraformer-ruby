@@ -77,7 +77,17 @@ module Terraformer
     end
 
     def intersects? other
-      raise NotImplementedError
+      [self, other].each do |e|
+        if [Point, MultiPoint].include? e.class
+          raise ArgumentError.new "unsupported type: #{e.type rescue e.class}"
+        end
+      end
+      return true if begin
+        within? other or other.within? self
+      rescue ArgumentError
+        false
+      end
+      Terraformer::Geometry.arrays_intersect_arrays? coordinates, other.coordinates
     end
 
     # todo - this is algorithmically bad, fix it

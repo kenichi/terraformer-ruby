@@ -9,4 +9,8 @@ class Array
     false
   end
 
+  def to_c
+    Terraformer::Coordinate.from_array self
+  end
+
 end

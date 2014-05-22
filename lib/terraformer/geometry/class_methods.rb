@@ -29,7 +29,7 @@ module Terraformer
         ua_t = (b2[0] - b1[0]) * (a1[1] - b1[1]) - (b2[1] - b1[1]) * (a1[0] - b1[0])
         ub_t = (a2[0] - a1[0]) * (a1[1] - b1[1]) - (a2[1] - a1[1]) * (a1[0] - b1[0])
         u_b  = (b2[1] - b1[1]) * (a2[0] - a1[0]) - (b2[0] - b1[0]) * (a2[1] - a1[1])
-        if u_b == 0
+        if u_b != 0
           ua = ua_t / u_b
           ub = ub_t / u_b
           return true if  0 <= ua && ua <= 1 && 0 <= ub && ub <= 1
@@ -37,60 +37,23 @@ module Terraformer
         false
       end
 
-      def array_intersects_array? a, b
-        a.each_cons(2) do |a1, a2|
-          b.each_cons(2) do |b1, b2|
-            if edge_intersects_edge? a1, a2, b1, b2
-              return true
+      def arrays_intersect_arrays? a, b
+        case
+        when a[0].class == Coordinate
+          case
+          when b[0].class == Coordinate
+            a.each_cons(2) do |a1, a2|
+              b.each_cons(2) do |b1, b2|
+                return true if edge_intersects_edge?(a1, a2, b1, b2)
+              end
             end
+          when b[0].class == Array
+            b.each {|e| return true if intersects = arrays_intersect_arrays?(a, e)}
           end
+        when a[0].class == Array
+          a.each {|e| return true if intersects = arrays_intersect_arrays?(e, b)}
         end
         false
-      end
-
-      def array_intersects_multi_array? a, b
-        intersects = false
-        b.each do |other|
-          intersects = array_intersects_array? a, other
-          break if intersects
-        end
-        intersects
-      end
-
-      def multi_array_intersects_multi_array? a, b
-        intersects = false
-        a.each do |other|
-          intersects = array_intersects_multi_array? other, b
-          break if intersects
-        end
-        intersects
-      end
-
-      def array_intersects_multi_multi_array? a, b
-        intersects = false
-        b.each do |other|
-          intersects = array_intersects_multi_array? a, other
-          break if intersects
-        end
-        intersects
-      end
-
-      def multi_array_intersects_multi_multi_array? a, b
-        intersects = false
-        a.each do |other|
-          intersects = array_intersects_multi_array? other, b
-          break if intersects
-        end
-        intersects
-      end
-
-      def multi_multi_array_intersects_multi_multi_array? a, b
-        intersects = false
-        a.each do |other|
-          intersects = multi_array_intersects_multi_multi_array? other, b
-          break if intersects
-        end
-        intersects
       end
 
     end

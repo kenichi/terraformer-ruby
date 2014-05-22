@@ -95,7 +95,7 @@ module Terraformer
     end
 
     def to_s
-      [x,y,z,m].compact.join ','
+      [x,y,z].compact.join ','
     end
 
     def to_json *args

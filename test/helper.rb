@@ -28,3 +28,5 @@ EXAMPLES = Dir[examples + '/*.geojson'].reduce({}) do |h, gj|
   h
 end
 
+PARSED_EXAMPLES = EXAMPLES.keys.reduce({}){|h,k| h[k] = Terraformer.parse EXAMPLES[k]; h}
+
