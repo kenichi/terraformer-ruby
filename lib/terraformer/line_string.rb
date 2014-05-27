@@ -10,14 +10,22 @@ module Terraformer
       coordinates.length > 3 and coordinates.first == coordinates.last
     end
 
+    def lines
+      ls = []
+      coordinates.each_cons(2) {|l| ls << l}
+      ls
+    end
+
     def contains? obj
       case obj
       when Point
-        coordinates.any? {|c| c == obj.coordinates}
+        lines.any? {|l| Geometry.line_contains_point? l, obj.coordinates}
       when LineString
         self == obj or coordinates.slice_exists? obj.coordinates
+        # todo this does not case for a line string of different coordinates
+        #      that is actually contained yet
       when MultiLineString
-        obj.line_strings.any? {|ls| ls.within? self}
+        obj.line_strings.all? {|ls| ls.within? self}
       else
         raise ArgumentError.new "unsupported type: #{obj.type rescue obj.class}"
       end
@@ -27,6 +35,8 @@ module Terraformer
       case obj
       when LineString
         self == obj or obj.coordinates.slice_exists? coordinates
+        # todo this does not case for a line string of different coordinates
+        #      that is actually contained yet
       when MultiLineString
         obj.line_strings.any? {|ls| ls.contains? self}
       when Polygon

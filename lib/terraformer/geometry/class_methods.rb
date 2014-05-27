@@ -56,6 +56,36 @@ module Terraformer
         false
       end
 
+      def line_contains_point? line, point
+        raise ArgumentError unless Array === line and
+                                   line.length == 2 and
+                                   Coordinate === line[0] and
+                                   Coordinate === line[1]
+        point = point.coordinates if Point === point
+        raise ArgumentError unless Coordinate === point
+
+        return true if line[0] == point or line[1] == point
+
+        dxp = point.x - line[0].x
+        dyp = point.y - line[0].y
+
+        dxl = line[1].x - line[0].x
+        dyl = line[1].y - line[0].y
+
+        cross = dxp * dyl - dyp * dxl
+        return false unless cross == BigMath::ZERO
+
+        if dxl.abs >= dyl.abs
+          return dxl > BigMath::ZERO ?
+            line[0].x <= point.x && point.x <= line[1].x :
+            line[1].x <= point.x && point.x <= line[0].x
+        else
+          return dyl > BigMath::ZERO ?
+            line[0].y <= point.y && point.y <= line[1].y :
+            line[1].y <= point.y && point.y <= line[0].y
+        end
+      end
+
     end
 
   end

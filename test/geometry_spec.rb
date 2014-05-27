@@ -810,6 +810,7 @@ describe Terraformer::Geometry do
     it 'returns true for line strings that contain points' do
       ls = PARSED_EXAMPLES[:line_string]
       assert ls.contains? ls.point_at(1)
+      assert ls.contains? [100.5,0.5].to_c.to_point
     end
 
     it 'returns true for multi line strings that contain points' do
@@ -1055,6 +1056,23 @@ describe Terraformer::Geometry do
         a = [[0,2], [2,2]].map &:to_c
         b = [[0,0], [2,0]].map &:to_c
         Terraformer::Geometry.arrays_intersect_arrays?(a, b).must_equal false
+      end
+
+    end
+
+    describe 'line_cotains_point?' do
+
+      it 'returns true for points on the line' do
+        assert Terraformer::Geometry.line_contains_point? [[0,0].to_c, [4,4].to_c], [2,2].to_c
+      end
+
+      it 'returns false for points that are not on the line' do
+        refute Terraformer::Geometry.line_contains_point? [[0,0].to_c, [4,4].to_c], [0,2].to_c
+      end
+
+      it 'returns true for points on the ends of the line' do
+        assert Terraformer::Geometry.line_contains_point? [[0,0].to_c, [4,4].to_c], [0,0].to_c
+        assert Terraformer::Geometry.line_contains_point? [[0,0].to_c, [4,4].to_c], [4,4].to_c
       end
 
     end
