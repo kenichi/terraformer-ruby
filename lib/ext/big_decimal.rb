@@ -8,5 +8,8 @@ class BigDecimal
     (self * Terraformer::RADIANS_PER_DEGREE).round Terraformer::PRECISION
   end
 
-end
+  def to_json *args
+    finite? ? to_f.to_json : NilClass::AS_JSON
+  end
 
+end

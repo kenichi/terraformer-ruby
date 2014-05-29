@@ -70,18 +70,9 @@ module Terraformer
     end
 
     def to_json *args
-      h = self.to_hash
-      h[:bbox] = bbox if Hash === args.last and args.pop[:include_bbox]
+      h = self.to_hash *args
+      args.pop if Hash === args.last
       h.to_json *args
-    end
-
-  end
-
-  # yikes!
-  module BBox
-
-    def to_json *args
-      map {|e| e.to_f if e}.to_json *args
     end
 
   end
@@ -101,3 +92,5 @@ require 'terraformer/polygon'
 require 'terraformer/multi_polygon'
 require 'terraformer/convex_hull'
 require 'terraformer/circle'
+
+require 'terraformer/version'

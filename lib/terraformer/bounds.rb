@@ -33,8 +33,6 @@ module Terraformer
 
         case format
         when :bbox
-          # yikes!
-          bbox.extend BBox
           bbox
         when :polygon
           Polygon.new [[bbox[0], bbox[1]],
@@ -55,15 +53,13 @@ module Terraformer
         else
           bbox = array.reduce box do |b, lonlat|
             lon, lat = *lonlat
-            set = ->(d, i, t){ b[i] = d if b[i].nil? or d.send(t, b[i]) }
+            set = ->(d, i, t){ b[i] = d if b[i].nil? or d.send(t, b[i])}
             set[lon, X1, :<]
             set[lon, X2, :>]
             set[lat, Y1, :<]
             set[lat, Y2, :>]
             b
           end
-          # yikes!
-          bbox.extend BBox
           bbox
         end
       end

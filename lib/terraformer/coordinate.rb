@@ -99,7 +99,7 @@ module Terraformer
     end
 
     def to_json *args
-      [x, y, z].map! {|e| e.to_f if e}.compact.to_json(*args)
+      compact.to_json(*args)
     end
 
     def to_point

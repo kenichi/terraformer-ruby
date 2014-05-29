@@ -22,11 +22,13 @@ module Terraformer
       end
     end
 
-    def to_hash
-      {
+    def to_hash *args
+      h = {
         type: type,
         coordinates: coordinates
       }
+      h[:bbox] = bbox if Hash === args.last and args.last[:include_bbox]
+      h
     end
 
     def to_mercator
