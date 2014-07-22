@@ -48,10 +48,10 @@ module Terraformer
               end
             end
           when b[0].class == Array
-            b.each {|e| return true if intersects = arrays_intersect_arrays?(a, e)}
+            b.each {|e| return true if arrays_intersect_arrays?(a, e)}
           end
         when a[0].class == Array
-          a.each {|e| return true if intersects = arrays_intersect_arrays?(e, b)}
+          a.each {|e| return true if arrays_intersect_arrays?(e, b)}
         end
         false
       end
