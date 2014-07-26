@@ -48,6 +48,11 @@ module Terraformer
     end
   end
 
+  def self.geojson_io data
+    require 'launchy'
+    Launchy.open "http://geojson.io/#data=data:application/json,#{URI.encode_www_form_component data.to_json}"
+  end
+
   class Primitive
 
     def initialize *args

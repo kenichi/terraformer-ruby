@@ -37,6 +37,10 @@ module Terraformer
       self.geometry.great_circle_distance other
     end
 
+    def geojson_io
+      Terraformer.geojson_io self
+    end
+
   end
 
   class FeatureCollection < Primitive
@@ -53,7 +57,7 @@ module Terraformer
     def initialize *args
       unless args.empty?
         super *args do |arg|
-          self.features = arg['features'].map {|f| Terraformer.parse f}
+          self.features = arg['features'].map {|f| Terraformer.parse f unless Primitive === f}
         end
       end
     end
@@ -76,6 +80,10 @@ module Terraformer
 
     def convex_hull
       ConvexHull.for features.map(&:geometry).map(&:coordinates)
+    end
+
+    def geojson_io
+      Terraformer.geojson_io self
     end
 
   end

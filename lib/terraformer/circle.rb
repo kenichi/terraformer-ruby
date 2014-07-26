@@ -4,7 +4,7 @@ module Terraformer
 
     attr_accessor :polygon
     attr_reader :center, :radius, :resolution
-    def_delegators :@polygon, :contains?, :within?, :intersects?, :to_feature, :to_json
+    def_delegators :@polygon, :contains?, :within?, :intersects?, :to_feature, :to_json, :to_hash
 
     def initialize c, r, res = DEFAULT_BUFFER_RESOLUTION
       self.center = c
