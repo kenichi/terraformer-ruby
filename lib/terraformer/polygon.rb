@@ -4,10 +4,19 @@ module Terraformer
 
     def initialize *args
       case
-      when Coordinate === args[0] # each arg is a position of the polygon
+
+      # each arg is a position of the polygon
+      when Coordinate === args[0] || (Array === args[0] && Numeric === args[0][0])
         self.coordinates = [Coordinate.from_array(args)]
-      when Array === args[0] # each arg is an array of positions; first is polygon, rest are "holes"
+
+      # each arg is an array of positions; first is polygon, rest are "holes"
+      when Array === args[0] && Array === args[0][0] && Numeric === args[0][0][0]
         self.coordinates = Coordinate.from args
+
+      # arg is an array of polygon, holes
+      when Array === args[0] && Array === args[0][0] && Array === args[0][0][0]
+        self.coordinates = Coordinate.from *args
+
       else
         super *args
       end
@@ -36,11 +45,22 @@ module Terraformer
 
         # then inner polygons (holes)
         #
+        equal = self.coordinates.length == obj.coordinates.length
+
         if equal and obj.coordinates.length > 1
-          1.upto(obj.coordinates.length - 1) do |i|
-            equal = self.coordinates[i].polygonally_equal_to? obj.coordinates[i]
+
+          self_holes = self.coordinates[1..-1].sort
+          obj_holes = obj.coordinates[1..-1].sort
+
+          self_holes.each_with_index do |hole, idx|
+            equal = hole.polygonally_equal_to? obj_holes[idx]
             break unless equal
           end
+
+          # 1.upto(obj.coordinates.length - 1) do |i|
+          #   equal = self.coordinates[i].polygonally_equal_to? obj.coordinates[i]
+          #   break unless equal
+          # end
         end
 
         equal

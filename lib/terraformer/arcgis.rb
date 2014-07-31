@@ -1,0 +1,152 @@
+module Terraformer
+  module ArcGIS
+
+    COMPRESSED_REGEX = /((\+|\-)[^\+\-]+)/
+
+    class << self
+
+      def require_array a
+        raise ArgumentError.new 'argument is not an Array' unless Array === a
+      end
+      private :require_array
+
+      def decompress_geometry str
+        raise ArgumentError.new 'argument is not a String' unless String === str
+        x_diff_prev, y_diff_prev = 0, 0
+        points = []
+        x,y = nil,nil
+        strings = str.scan(COMPRESSED_REGEX).map {|m| m[0]}
+        coefficient = Integer(strings.shift, 32).to_f
+        strings.each_slice(2) do |m,n|
+          x = Integer(m, 32) + x_diff_prev
+          x_diff_prev = x
+          y = Integer(n, 32) + y_diff_prev
+          y_diff_prev = y
+          points << [x/coefficient, y/coefficient]
+        end
+        points
+      end
+
+      def close_ring cs
+        require_array cs
+        cs << cs.first if cs.first != cs.last
+        cs
+      end
+
+      def clockwise? ring
+        require_array ring
+        total, i = 0, 0
+        r_lim = ring.length - 1
+        ring.each_cons(2) do |a,b|
+          total += (b[0] - a[0]) * (b[1] + a[1])
+          i += 1
+          break if i == r_lim
+        end
+        total >= 0
+      end
+
+      def orient_rings polygon
+        require_array polygon
+        oriented = []
+        outer_ring = close_ring polygon.shift
+        if outer_ring.length >= 4
+          outer_ring.reverse unless clockwise? outer_ring
+          oriented << outer_ring
+          polygon.each do |hole|
+            hole = close_ring hole
+            if hole.length >= 4
+              hole.reverse if clockwise? hole
+            end
+            oriented << hole
+          end
+        end
+        oriented
+      end
+
+      def convert_rings rings
+        require_array rings
+        outer_rings, holes = [], []
+
+        rings.each do |ring|
+          ring = close_ring ring
+          next if ring.length < 4
+          if clockwise? ring
+            outer_rings << [ring]
+          else
+            holes << ring
+          end
+        end
+
+        holes.each do |hole|
+          matched = false
+          outer_rings.each do |oring|
+            binding.pry
+            if Polygon.new(oring[0]).contains? Polygon.new(hole)
+              oring << hole
+              matched = true
+              break
+            end
+          end
+          outer_rings << [hole.reverse] unless matched
+        end
+
+        binding.pry
+        if outer_rings.length == 1
+          Polygon.new outer_rings.first
+        else
+          polygons = outer_rings.map {|r| Polygon.new r}
+          MultiPolygon.new *polygons
+        end
+      end
+
+      def parse arcgis, opts = {}
+        arcgis = JSON.parse arcgis if String === arcgis
+        raise ArgumentError.new 'argument not hash nor json' unless Hash === arcgis
+
+        obj = case
+              when Numeric === arcgis['x'] && Numeric === arcgis['y']
+                Coordinate.new(%w[x y z].map {|k| arcgis[k]}).to_point
+
+              when arcgis['points']
+                require_array arcgis['points']
+                MultiPoint.new arcgis['points']
+
+              when arcgis['paths']
+                require_array arcgis['paths']
+                if arcgis['paths'].length == 1
+                  LineString.new arcgis['paths'][0]
+                else
+                  MultiLineString.new arcgis['paths']
+                end
+
+              when arcgis['rings']
+                convert_rings arcgis['rings']
+
+              when !(%w[compressedGeometry geometry attributes].map {|k| arcgis[k]}.empty?)
+
+                if arcgis['compressedGeometry']
+                  arcgis['geometry'] = {'paths' => [decompress_geometry(arcgis['compressedGeometry'])]}
+                end
+
+                o = Feature.new
+                o.geometry = parse arcgis['geometry'] if arcgis['geometry']
+                if attrs = arcgis['attributes']
+                  o.properties = attrs.clone
+                  o.id = attrs.fetch opts[:id_attribute], attrs.fetch('OBJECTID', attrs['FID'])
+                end
+                o
+
+              end
+
+        isr = arcgis['geometry'] ? arcgis['geometry']['spatialReference'] : arcgis['spatialReference']
+        if Integer(isr['wkid']) == 102100
+          Feature === obj ? obj.geometry.to_geographic! : obj.to_geographic!
+        end
+
+        obj
+      end
+
+    end
+
+  end
+end

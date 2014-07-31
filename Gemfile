@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'rake'
+gem 'launchy', require: nil
 
 group :test do
   gem 'http'

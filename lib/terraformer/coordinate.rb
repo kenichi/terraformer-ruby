@@ -40,10 +40,12 @@ module Terraformer
         raise ArgumentError if _y
         self.x = _x[0]
         self.y = _x[1]
+        self.z = _x[2] if _x[2]
       when Numeric === _x || String === _x
         raise ArgumentError unless _y
         self.x = _x
         self.y = _y
+        self.z = _z if _z
       else
         raise ArgumentError.new "invalid argument: #{_x}"
       end
@@ -69,7 +71,11 @@ module Terraformer
       self[2]
     end
 
-    [:z=, :<<, :*, :&, :|].each do |sym|
+    def z= _z
+      self[2] = Coordinate.big_decimal _z
+    end
+
+    [:<<, :*, :&, :|].each do |sym|
       define_method(sym){|*a| raise NotImplementedError }
     end
 

@@ -97,5 +97,6 @@ require 'terraformer/polygon'
 require 'terraformer/multi_polygon'
 require 'terraformer/convex_hull'
 require 'terraformer/circle'
+require 'terraformer/arcgis'
 
 require 'terraformer/version'
