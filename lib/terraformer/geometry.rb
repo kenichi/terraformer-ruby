@@ -35,16 +35,8 @@ module Terraformer
       self.class.new *coordinates.map_coordinate(&:to_mercator)
     end
 
-    def to_mercator!
-      self.replace(self.to_mercator)
-    end
-
     def to_geographic
       self.class.new *coordinates.map_coordinate(&:to_geographic)
-    end
-
-    def to_geographic!
-      self.replace(self.to_geographic)
     end
 
     def to_feature

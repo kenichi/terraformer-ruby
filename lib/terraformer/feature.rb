@@ -26,8 +26,8 @@ module Terraformer
       h = {
         type: type,
         properties: properties,
-        geometry: geometry.to_hash
       }
+      h.merge! geometry: geometry.to_hash if geometry
       h.merge! id: id if id
       h
     end
@@ -39,6 +39,11 @@ module Terraformer
 
     def geojson_io
       Terraformer.geojson_io self
+    end
+
+    def == obj
+      return false unless Feature === obj
+      to_hash == obj.to_hash
     end
 
   end
@@ -76,6 +81,11 @@ module Terraformer
         type: type,
         features: features.map(&:to_hash)
       }
+    end
+
+    def == obj
+      return false unless FeatureCollection === obj
+      to_hash == obj.to_hash
     end
 
     def convex_hull

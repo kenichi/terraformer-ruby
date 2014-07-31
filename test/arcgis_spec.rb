@@ -89,11 +89,17 @@ describe Terraformer::ArcGIS do
   describe 'parse' do
 
     def must_parse json, expected_class, *expected_init_data
-      output = Terraformer::ArcGIS.parse json
-      output.must_be_instance_of expected_class
       if block_given?
+        output = if Hash === expected_init_data[0]
+          Terraformer::ArcGIS.parse json, expected_init_data[0]
+        else
+          Terraformer::ArcGIS.parse json
+        end
+        output.must_be_instance_of expected_class
         output.must_equal yield(output)
       else
+        output = Terraformer::ArcGIS.parse json
+        output.must_be_instance_of expected_class
         output.must_equal expected_class.new *expected_init_data
       end
     end
@@ -335,6 +341,177 @@ describe Terraformer::ArcGIS do
         output.geometry.must_equal p
         f = p.to_feature
         f.properties['foo'] = 'bar'
+        f.id = nil
+        f
+      end
+    end
+
+    it 'parses arcgis features with objectid' do
+      must_parse '{
+        "geometry": {
+          "rings": [
+            [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625] ]
+          ],
+          "spatialReference": {
+            "wkid": 4326
+          }
+        },
+        "attributes": {
+          "OBJECTID": 123
+        }
+      }', Terraformer::Feature do |output|
+        p = Terraformer::Polygon.new [[
+          [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625]
+        ]]
+        output.geometry.must_equal p
+        f = p.to_feature
+        f.id = 123
+        f
+      end
+    end
+
+    it 'parses arcgis features with fid' do
+      must_parse '{
+        "geometry": {
+          "rings": [
+            [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625] ]
+          ],
+          "spatialReference": {
+            "wkid": 4326
+          }
+        },
+        "attributes": {
+          "FID": 123
+        }
+      }', Terraformer::Feature do |output|
+        p = Terraformer::Polygon.new [[
+          [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625]
+        ]]
+        output.geometry.must_equal p
+        f = p.to_feature
+        f.id = 123
+        f
+      end
+    end
+
+    it 'parses arcgis features with custom id' do
+      must_parse '{
+        "geometry": {
+          "rings": [
+            [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625] ]
+          ],
+          "spatialReference": {
+            "wkid": 4326
+          }
+        },
+        "attributes": {
+          "FooId": 123
+        }
+      }', Terraformer::Feature, {id_attribute: 'FooId'} do |output|
+        p = Terraformer::Polygon.new [[
+          [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625]
+        ]]
+        output.geometry.must_equal p
+        f = p.to_feature
+        f.id = 123
+        f
+      end
+    end
+
+    it 'parses arcgis features with empty attributes' do
+      must_parse '{
+        "geometry": {
+          "rings": [
+            [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625] ]
+          ],
+          "spatialReference": {
+            "wkid": 4326
+          }
+        },
+        "attributes": {}
+      }', Terraformer::Feature do |output|
+        p = Terraformer::Polygon.new [[
+          [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625]
+        ]]
+        output.geometry.must_equal p
+        f = p.to_feature
+        f.id = nil
+        f
+      end
+    end
+
+    it 'parses arcgis features with no attributes' do
+      must_parse '{
+        "geometry": {
+          "rings": [
+            [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625] ]
+          ],
+          "spatialReference": {
+            "wkid": 4326
+          }
+        }
+      }', Terraformer::Feature do |output|
+        p = Terraformer::Polygon.new [[
+          [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625]
+        ]]
+        output.geometry.must_equal p
+        f = p.to_feature
+        f.id = nil
+        f
+      end
+    end
+
+    it 'parses arcgis features with no geometry' do
+      must_parse '{
+        "attributes": {
+          "foo": "bar"
+        }
+      }', Terraformer::Feature do |output|
+        f = Terraformer::Feature.new
+        f.properties = {'foo' => 'bar'}
+        f.id = nil
+        f
+      end
+    end
+
+    it 'parses arcgis geometry in web mercator' do
+      must_parse '{
+        "x": -13580977.876779145,
+        "y": 5621521.486191948,
+        "spatialReference": {
+          "wkid": 102100
+        }
+      }', Terraformer::Point, [-121.999999999998, 44.99999999999942]
+    end
+
+    it 'does not modify arcgis data while parsing' do
+      input = {
+        "geometry" => {
+          "rings" => [
+            [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625] ]
+          ],
+          "spatialReference" => {
+            "wkid" => 4326
+          }
+        },
+        "attributes" => {
+          "foo" => "bar"
+        }
+      }
+      original = input.clone
+      Terraformer::ArcGIS.parse input
+      original.must_equal input
+    end
+
+    it 'decompresses arcgis compressed geometry' do
+      must_parse '{
+        "compressedGeometry": "+1m91-66os4+1poms+1+91+3+3j"
+      }', Terraformer::Feature do |output|
+        ls = Terraformer::LineString.new [
+          [-117.1816137447153, 34.057461545380946],[-117.18159575425025, 34.06266078978142], [-117.18154178285509, 34.06472969326257]
+        ]
+        output.geometry.must_equal ls
+        f = ls.to_feature
         f
       end
     end

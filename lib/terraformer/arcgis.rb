@@ -80,7 +80,6 @@ module Terraformer
         holes.each do |hole|
           matched = false
           outer_rings.each do |oring|
-            binding.pry
             if Polygon.new(oring[0]).contains? Polygon.new(hole)
               oring << hole
               matched = true
@@ -90,7 +89,6 @@ module Terraformer
           outer_rings << [hole.reverse] unless matched
         end
 
-        binding.pry
         if outer_rings.length == 1
           Polygon.new outer_rings.first
         else
@@ -132,15 +130,25 @@ module Terraformer
                 o.geometry = parse arcgis['geometry'] if arcgis['geometry']
                 if attrs = arcgis['attributes']
                   o.properties = attrs.clone
-                  o.id = attrs.fetch opts[:id_attribute], attrs.fetch('OBJECTID', attrs['FID'])
+                  if opts[:id_attribute] and o.properties[opts[:id_attribute]]
+                    o.id = o.properties.delete opts[:id_attribute]
+                  elsif o.properties['OBJECTID']
+                    o.id = o.properties.delete 'OBJECTID'
+                  elsif o.properties['FID']
+                    o.id = o.properties.delete 'FID'
+                  end
                 end
                 o
 
               end
 
         isr = arcgis['geometry'] ? arcgis['geometry']['spatialReference'] : arcgis['spatialReference']
-        if Integer(isr['wkid']) == 102100
-          Feature === obj ? obj.geometry.to_geographic! : obj.to_geographic!
+        if isr and Integer(isr['wkid']) == 102100
+          if Feature === obj
+            obj.geometry = obj.geometry.to_geographic
+          else
+            obj = obj.to_geographic
+          end
         end
 
         obj

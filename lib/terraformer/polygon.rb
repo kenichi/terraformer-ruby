@@ -42,25 +42,19 @@ module Terraformer
         # first check outer polygon
         equal = self.coordinates[0].polygonally_equal_to? obj.coordinates[0]
 
-
         # then inner polygons (holes)
         #
-        equal = self.coordinates.length == obj.coordinates.length
+        if equal
+          if self.coordinates.length == obj.coordinates.length and obj.coordinates.length > 1
 
-        if equal and obj.coordinates.length > 1
+            self_holes = self.coordinates[1..-1].sort
+            obj_holes = obj.coordinates[1..-1].sort
 
-          self_holes = self.coordinates[1..-1].sort
-          obj_holes = obj.coordinates[1..-1].sort
-
-          self_holes.each_with_index do |hole, idx|
-            equal = hole.polygonally_equal_to? obj_holes[idx]
-            break unless equal
+            self_holes.each_with_index do |hole, idx|
+              equal = hole.polygonally_equal_to? obj_holes[idx]
+              break unless equal
+            end
           end
-
-          # 1.upto(obj.coordinates.length - 1) do |i|
-          #   equal = self.coordinates[i].polygonally_equal_to? obj.coordinates[i]
-          #   break unless equal
-          # end
         end
 
         equal
