@@ -518,4 +518,382 @@ describe Terraformer::ArcGIS do
 
   end
 
+  describe 'flatten_multi_polygon_rings' do
+
+    it 'flattens geojson polygons into oriented rings' do
+      Terraformer::ArcGIS.flatten_multi_polygon_rings([
+          [
+            [ [102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0] ]
+          ],
+          [
+            [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ]
+          ]
+        ]
+      ).must_equal [
+          [ [102, 2], [102, 3], [103, 3], [103, 2], [102, 2] ],
+          [ [100, 0], [100, 1], [101, 1], [101, 0], [100, 0] ]
+        ]
+    end
+
+  end
+
+  describe 'convert' do
+
+    def must_convert json, expected, opts = {}
+      JSON.parse(Terraformer::ArcGIS.convert(json, opts).to_json).must_equal JSON.parse(expected.to_json)
+    end
+
+    it 'converts geojson point' do
+      must_convert '{
+        "type": "Point",
+        "coordinates": [-58.7109375, 47.4609375]
+      }', {
+        x: -58.7109375,
+        y: 47.4609375,
+        spatialReference: {
+          wkid: 4326
+        }
+      }
+    end
+
+    it 'converts geojson point with z' do
+      must_convert '{
+        "type": "Point",
+        "coordinates": [-58.7109375, 47.4609375, 100]
+      }', {
+        x: -58.7109375,
+        y: 47.4609375,
+        z: 100,
+        spatialReference: {
+          wkid: 4326
+        }
+      }
+    end
+
+    it 'converts geojson point at null island' do
+      must_convert '{
+        "type": "Point",
+        "coordinates": [0, 0]
+      }', {
+        x: 0,
+        y: 0,
+        spatialReference: {
+          wkid: 4326
+        }
+      }
+    end
+
+    it 'converts geojson linestring' do
+      must_convert '{
+        "type": "LineString",
+        "coordinates": [ [21.4453125,-14.0625],[33.3984375,-20.7421875],[38.3203125,-24.609375] ]
+      }', {
+        paths:[
+          [ [21.4453125,-14.0625],[33.3984375,-20.7421875],[38.3203125,-24.609375] ]
+        ],
+        spatialReference: {
+          wkid: 4326
+        }
+      }
+    end
+
+    it 'converts geojson polygon' do
+      must_convert '{
+        "type": "Polygon",
+        "coordinates": [
+          [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625] ]
+        ]
+      }', {
+        rings:[
+          [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625] ]
+        ],
+        spatialReference: {
+          wkid: 4326
+        }
+      }
+    end
+
+    it 'converts geojson polygon with hole' do
+      must_convert '{
+        "type": "Polygon",
+        "coordinates": [
+          [ [100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0] ],
+          [ [100.2,0.2],[100.8,0.2],[100.8,0.8],[100.2,0.8],[100.2,0.2] ]
+        ]
+      }', {
+        rings: [
+          [ [100.0, 0.0], [100.0, 1.0], [101.0, 1.0], [101.0, 0.0], [100.0, 0.0] ],
+          [ [100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2] ]
+        ],
+        spatialReference: {
+          wkid: 4326
+        }
+      }
+    end
+
+    it 'converts geojson multipoint' do
+      must_convert '{
+        "type": "MultiPoint",
+        "coordinates": [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625] ]
+      }', {
+        points: [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625] ],
+        spatialReference: {
+          wkid: 4326
+        }
+      }
+    end
+
+    it 'converts geojson multilinestring' do
+      must_convert '{
+        "type": "MultiLineString",
+        "coordinates": [
+          [ [41.8359375,71.015625],[56.953125,33.75] ],
+          [ [21.796875,36.5625],[47.8359375,71.015625] ]
+        ]
+      }', {
+        paths: [
+          [ [41.8359375,71.015625],[56.953125,33.75] ],
+          [ [21.796875,36.5625],[47.8359375,71.015625] ]
+        ],
+        spatialReference: {
+          wkid: 4326
+        }
+      }
+    end
+
+    it 'converts geojson multipolygon' do
+      must_convert '{
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [ [102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0] ]
+          ],
+          [
+            [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ]
+          ]
+        ]
+      }', {
+        rings:[
+          [ [102, 2], [102, 3], [103, 3], [103, 2], [102, 2] ],
+          [ [100, 0], [100, 1], [101, 1], [101, 0], [100, 0] ]
+        ],
+        spatialReference: {
+          wkid:4326
+        }
+      }
+    end
+
+    it 'converts geojson multipolygon with holes' do
+      must_convert '{
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [ [102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0] ]
+          ],
+          [
+            [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ],
+            [ [100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2] ]
+          ]
+        ]
+      }', {
+        rings: [
+          [ [102,2],[102,3],[103,3],[103,2],[102,2] ],
+          [ [100.2,0.2],[100.8,0.2],[100.8,0.8],[100.2,0.8],[100.2,0.2] ],
+          [ [100,0],[100,1],[101,1],[101,0],[100,0] ]
+        ],
+        spatialReference: {
+          wkid: 4326
+        }
+      }
+    end
+
+    it 'converts geojson feature' do
+      must_convert '{
+        "type":"Feature",
+        "id": "foo",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625] ]
+          ]
+        },
+        "properties": {
+          "foo":"bar"
+        }
+      }', {
+        geometry:{
+          rings:[
+            [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625] ]
+          ],
+          spatialReference:{
+            wkid:4326
+          }
+        },
+        attributes: {
+          foo: "bar",
+          OBJECTID: "foo"
+        }
+      }
+    end
+
+    it 'converts geojson feature with custom id' do
+      must_convert '{
+        "type":"Feature",
+        "id": "foo",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625] ]
+          ]
+        },
+        "properties": {
+          "foo":"bar"
+        }
+      }', {
+        geometry:{
+          rings:[
+            [ [41.8359375,71.015625],[56.953125,33.75],[21.796875,36.5625],[41.8359375,71.015625] ]
+          ],
+          spatialReference:{
+            wkid:4326
+          }
+        },
+        attributes: {
+          foo:"bar",
+          myId: "foo"
+        }
+        
+      }, id_attribute: 'myId'
+    end
+
+    it 'converts geojson feature with no geometry or properties' do
+      must_convert '{
+        "type":"Feature",
+        "id": "foo",
+        "geometry": null,
+        "properties": null
+      }', {
+        attributes: {
+          OBJECTID: "foo"
+        }
+      }
+    end
+
+    it 'converts geojson feature collections' do
+      must_convert '{
+        "type": "FeatureCollection",
+        "features": [{
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [102.0, 0.5]
+          },
+          "properties": {
+            "prop0": "value0"
+          }
+        }, {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [102.0, 0.0],[103.0, 1.0],[104.0, 0.0],[105.0, 1.0]
+            ]
+          },
+          "properties": {
+            "prop0": "value0"
+          }
+        }, {
+          "type": "Feature",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [ [100.0, 0.0],[101.0, 0.0],[101.0, 1.0],[100.0, 1.0],[100.0, 0.0] ]
+            ]
+          },
+          "properties": {
+            "prop0": "value0"
+          }
+        }]
+      }', [
+        {
+          geometry: {
+            x: 102.0,
+            y: 0.5,
+            spatialReference: {
+              wkid: 4326
+            }
+          },
+          attributes: {
+            prop0: "value0"
+          }
+        },
+        {
+          geometry: {
+            paths: [
+              [[102.0, 0.0],[103.0, 1.0],[104.0, 0.0],[105.0, 1.0]]
+            ],
+            spatialReference: {
+              wkid: 4326
+            }
+          },
+          attributes: {
+            prop0: "value0"
+          }
+        },
+        {
+          geometry: {
+            rings: [
+              [ [100.0,0.0],[100.0,1.0],[101.0,1.0],[101.0,0.0],[100.0,0.0] ]
+            ],
+            spatialReference: {
+              wkid: 4326
+            }
+          },
+          attributes: {
+            prop0: "value0"
+          }
+        }
+      ]
+    end
+
+    it 'converts geojson geometry collections' do
+      must_convert '{
+        "type" : "GeometryCollection",
+        "geometries" : [{
+          "type" : "Polygon",
+          "coordinates" : [[[-95, 43], [-95, 50], [-90, 50], [-91, 42], [-95, 43]]]
+        }, {
+          "type" : "LineString",
+          "coordinates" : [[-89, 42], [-89, 50], [-80, 50], [-80, 42]]
+        }, {
+          "type" : "Point",
+          "coordinates" : [-94, 46]
+        }]
+      }', [
+        {
+          rings: [
+            [[-95.0, 43.0],[-95.0, 50.0],[-90.0, 50.0],[-91.0, 42.0],[-95.0, 43.0]]
+          ],
+          spatialReference: {
+            wkid: 4326
+          }
+        }, {
+          paths: [
+            [[-89.0, 42.0],[-89.0, 50.0],[-80.0, 50.0],[-80.0, 42.0]]
+          ],
+          spatialReference: {
+            wkid: 4326
+          }
+        }, {
+          x: -94.0,
+          y: 46.0,
+          spatialReference: {
+            wkid: 4326
+          }
+        }
+      ]
+    end
+
+  end
+
 end

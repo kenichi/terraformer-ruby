@@ -3,7 +3,7 @@ module Terraformer
   class Feature < Primitive
     extend Forwardable
 
-    attr_accessor :id, :geometry
+    attr_accessor :id, :geometry, :crs
     attr_writer :properties
 
     def_delegator :@geometry, :convex_hull
@@ -13,7 +13,7 @@ module Terraformer
         super *args do |arg|
           self.id = arg['id'] if arg.key? 'id'
           self.properties = arg['properties'] if arg.key? 'properties'
-          self.geometry = Terraformer.parse arg['geometry']
+          self.geometry = Terraformer.parse arg['geometry'] if arg['geometry']
         end
       end
     end
@@ -27,8 +27,8 @@ module Terraformer
         type: type,
         properties: properties,
       }
-      h.merge! geometry: geometry.to_hash if geometry
-      h.merge! id: id if id
+      h[:geometry] = geometry.to_hash if geometry
+      h[:id] = id if id
       h
     end
 
@@ -50,6 +50,7 @@ module Terraformer
 
   class FeatureCollection < Primitive
 
+    attr_accessor :crs
     attr_writer :features
 
     def self.with_features *f
@@ -77,10 +78,12 @@ module Terraformer
     end
 
     def to_hash
-      {
+      h = {
         type: type,
         features: features.map(&:to_hash)
       }
+      h[:crs] = crs if crs
+      h
     end
 
     def == obj

@@ -51,7 +51,7 @@ module Terraformer
         oriented = []
         outer_ring = close_ring polygon.shift
         if outer_ring.length >= 4
-          outer_ring.reverse unless clockwise? outer_ring
+          outer_ring.reverse! unless clockwise? outer_ring
           oriented << outer_ring
           polygon.each do |hole|
             hole = close_ring hole
@@ -156,7 +156,68 @@ module Terraformer
       end
 
       def convert geojson, opts = {}
+        geojson = Terraformer.parse geojson unless Primitive === geojson
         opts[:id_attribute] ||= OBJECT_ID
+
+        sr = {wkid: opts[:sr] || 4326}
+        geojson_crs = GeometryCollection === geojson ? geojson.geometries.first.crs : geojson.crs
+        sr[:wkid] = 102100 if geojson_crs == Terraformer::MERCATOR_CRS
+
+        arcgis = {}
+
+        case geojson
+        when Point
+          fc = geojson.first_coordinate
+          arcgis[:x] = fc.x
+          arcgis[:y] = fc.y
+          arcgis[:z] = fc.z if fc.z
+          arcgis[:spatialReference] = sr
+
+        when MultiPoint
+          arcgis[:points] = geojson.coordinates.clone
+          arcgis[:spatialReference] = sr
+
+        when LineString
+          arcgis[:paths] = [geojson.coordinates.clone]
+          arcgis[:spatialReference] = sr
+
+        when MultiLineString
+          arcgis[:paths] = geojson.coordinates.clone
+          arcgis[:spatialReference] = sr
+
+        when Polygon
+          arcgis[:rings] = orient_rings geojson.coordinates.clone
+          arcgis[:spatialReference] = sr
+
+        when MultiPolygon
+          arcgis[:rings] = flatten_multi_polygon_rings geojson.coordinates.clone
+          arcgis[:spatialReference] = sr
+
+        when Feature
+          arcgis[:geometry] = convert(geojson.geometry, opts) if geojson.geometry
+          arcgis[:attributes] = geojson.properties ? geojson.properties.clone : {}
+          arcgis[:attributes][opts[:id_attribute]] = geojson.id if geojson.id
+
+        when FeatureCollection
+          arcgis = geojson.features.map {|f| convert f, opts}
+
+        when GeometryCollection
+          arcgis = geojson.geometries.map {|f| convert f, opts}
+
+        end
+
+        arcgis
+      end
+
+      def flatten_multi_polygon_rings rings
+        out = []
+        rings.each do |r|
+          polygon = orient_rings r
+          polygon.reverse.each do |p|
+            out << p.dup
+          end
+        end
+        out
       end
 
     end

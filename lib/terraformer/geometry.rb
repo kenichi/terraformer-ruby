@@ -7,7 +7,7 @@ module Terraformer
 
     MULTI_REGEX = /^Multi/
 
-    attr_accessor :coordinates
+    attr_accessor :coordinates, :crs
 
     def initialize *args
       case
@@ -27,6 +27,7 @@ module Terraformer
         type: type,
         coordinates: coordinates
       }
+      h[:crs] = crs if crs
       h[:bbox] = bbox if Hash === args.last and args.last[:include_bbox]
       h
     end
