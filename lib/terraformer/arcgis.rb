@@ -2,6 +2,7 @@ module Terraformer
   module ArcGIS
 
     COMPRESSED_REGEX = /((\+|\-)[^\+\-]+)/
+    OBJECT_ID = 'OBJECTID'
 
     class << self
 
@@ -132,8 +133,8 @@ module Terraformer
                   o.properties = attrs.clone
                   if opts[:id_attribute] and o.properties[opts[:id_attribute]]
                     o.id = o.properties.delete opts[:id_attribute]
-                  elsif o.properties['OBJECTID']
-                    o.id = o.properties.delete 'OBJECTID'
+                  elsif o.properties[OBJECT_ID]
+                    o.id = o.properties.delete OBJECT_ID
                   elsif o.properties['FID']
                     o.id = o.properties.delete 'FID'
                   end
@@ -152,6 +153,10 @@ module Terraformer
         end
 
         obj
+      end
+
+      def convert geojson, opts = {}
+        opts[:id_attribute] ||= OBJECT_ID
       end
 
     end
