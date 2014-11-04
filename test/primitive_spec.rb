@@ -40,6 +40,12 @@ describe Terraformer::Primitive do
       bbox.must_equal expected
     end
 
+    it 'works on features' do
+      wc = Terraformer.parse EXAMPLES[:waldocanyon]
+      bbox = wc.bbox
+      bbox.dont_be_terrible_ok
+    end
+
   end
 
   describe 'to_json' do

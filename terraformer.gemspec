@@ -12,4 +12,5 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Terraformer::VERSION
   gem.license       = 'apache'
+  gem.add_runtime_dependency 'launchy', '~>2.4'
 end

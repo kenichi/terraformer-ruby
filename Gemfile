@@ -1,11 +1,10 @@
 source 'https://rubygems.org'
 
-gem 'rake'
-gem 'launchy', require: nil
+gem 'launchy', '~>2.4', require: nil
 
 group :test do
-  gem 'http'
-  gem 'pry'
-  gem 'pry-nav'
-  gem 'ruby-prof'
+  gem 'httpclient', '~>2.5'
+  gem 'pry', '~>0.10'
+  gem 'pry-nav', '~>0.2'
+  gem 'ruby-prof', '~>0.15'
 end

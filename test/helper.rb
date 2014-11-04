@@ -11,9 +11,12 @@ require 'terraformer'
 module MiniTest::Expectations
 
   GEOJSON_VALIDATE_URL = 'http://geojsonlint.com/validate'
+  GEOJSON_VALIDATE_HEADERS = {'Content-Type' => 'application/json'}
+
+  HC = HTTPClient.new
 
   def validate_geojson geojson_h
-    r = JSON.parse HTTP['Content-Type' => 'application/json'].post(GEOJSON_VALIDATE_URL, json: geojson_h).body
+    r = JSON.parse HC.post(GEOJSON_VALIDATE_URL, geojson_h.to_json, GEOJSON_VALIDATE_HEADERS).body
     r['status'].must_equal 'ok'
   end
 
