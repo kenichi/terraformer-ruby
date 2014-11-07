@@ -17,20 +17,14 @@ module Enumerable
   def iter_coordinate meth, opts = {}, &block
     opts[:recurse] = true if opts[:recurse].nil?
 
-    if Array === self and Numeric === self[0]
-      yield self
-    else
-
-      self.__send__ meth do |pair|
-        raise IndexError unless Array === pair
-        case pair[0]
-        when Numeric
-          yield pair
-        when Array
-          pair.iter_coordinate meth, opts, &block if opts[:recurse]
-        else
-          raise IndexError.new "#{pair[0]} is not a Numeric or Array type"
-        end
+    self.__send__ meth do |coord|
+      case coord
+      when Coordinate
+        yield coord
+      when Array
+        coord.iter_coordinate meth, opts, &block if opts[:recurse]
+      else
+        raise IndexError.new "#{coord} is not a Numeric or Array type"
       end
     end
   end

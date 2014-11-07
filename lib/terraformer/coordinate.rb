@@ -1,12 +1,15 @@
 module Terraformer
 
-  class Coordinate < ::Array
+  class Coordinate
+    extend Forwardable
+
+    def_delegators :@array, :[], :[]=, :each, :map
 
     # http://en.wikipedia.org/wiki/Earth_radius#Mean_radius
     #
     EARTH_MEAN_RADIUS = 6371009.to_d
 
-    attr_accessor :crs
+    attr_accessor :array, :crs
 
     class << self
 
@@ -34,9 +37,9 @@ module Terraformer
     end
 
     def initialize _x, _y = nil, _z = nil
-      super 3
+      @array = Array.new 3
       case
-      when Array === _x
+      when Array === _x || Coordinate === _x
         raise ArgumentError if _y
         self.x = _x[0]
         self.y = _x[1]
@@ -49,6 +52,10 @@ module Terraformer
       else
         raise ArgumentError.new "invalid argument: #{_x}"
       end
+    end
+
+    def == obj
+      Coordinate === obj and array == obj.array
     end
 
     def x
