@@ -45,7 +45,7 @@ module Terraformer
   # is determined by +type+ property.
   #
   def self.parse geojson
-    if geojson.is_a?(String) or geojson.is_a?(File)
+    if geojson.is_a?(String) or geojson.respond_to?(:read)
       geojson = File.read geojson if File.readable? geojson
       geojson = JSON.parse geojson
     end

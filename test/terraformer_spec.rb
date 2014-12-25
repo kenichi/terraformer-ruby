@@ -63,6 +63,16 @@ describe Terraformer do
       p.coordinates.must_equal Terraformer::Coordinate.new 100, 0
     end
 
+    it 'parses the target of a Pathname' do
+      require "pathname"
+      path = Pathname.new('test/examples/point.geojson')
+      p = Terraformer.parse path
+      p.dont_be_terrible_ok
+      p.type.must_equal 'Point'
+      p.coordinates.must_be_instance_of Terraformer::Coordinate
+      p.coordinates.must_equal Terraformer::Coordinate.new 100, 0
+    end
+
     it 'parses polygons' do
       p = Terraformer.parse EXAMPLES[:polygon]
       p.dont_be_terrible_ok
