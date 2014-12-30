@@ -62,6 +62,7 @@ module Terraformer
   #
   def self.geojson_io data
     require 'launchy'
+    require 'uri'
     Launchy.open "http://geojson.io/#data=data:application/json,#{URI.encode_www_form_component data.to_json}"
   end
 
