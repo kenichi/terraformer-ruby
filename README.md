@@ -1,19 +1,27 @@
 terraformer-ruby
 ================
 
-mostly faithful port of [terraformer](https://github.com/Esri/Terraformer)
+[terraformer-ruby](https://github.com/kenichi/terraformer-ruby) is a mostly faithful port of [terraformer](https://github.com/Esri/Terraformer).
 
-### Installation
+## Installation
 
-`gem install terraformer`
+In your application's Gemfile:
 
-or include in an application's `Gemfile`
+```ruby
+gem 'terraformer'
+```
 
-`gem terraformer`
+Or install it manually:
 
-### Basic usage
+```sh
+$ gem install terraformer
+```
 
-[terraformer-ruby](https://github.com/esripdx/terraformer-ruby) is a port of [terraformer](https://github.com/Esri/Terraformer).
+## Usage
+
+```ruby
+require 'terraformer'
+```
 
 ##### Create a Terraformer primitive from GeoJSON
 
@@ -51,4 +59,21 @@ You can also have Terraformer perform many geometric operations like convex hull
 > convex_hull = polygon.convex_hull
 > point.within? convex_hull #returns true
 > bounding_box = polygon.bbox #returns the bounding box for this object.
+```
+
+## Contributing
+
+After checking out the source, run the tests:
+
+```
+$ git clone git@github.com:kenichi/terraformer-ruby.git
+$ cd terraformer-ruby
+$ bundle install
+$ bundle exec rake test
+```
+
+You can also generate RDoc:
+
+```
+$ bundle exec rdoc --main README.md
 ```
