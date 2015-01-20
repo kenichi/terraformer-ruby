@@ -11,11 +11,11 @@ module Terraformer
 
       # each arg is an array of positions; first is polygon, rest are "holes"
       when Array === args[0] && Array === args[0][0] && Numeric === args[0][0][0]
-        self.coordinates = Coordinate.from args
+        self.coordinates = Coordinate.from_array args
 
       # arg is an array of polygon, holes
       when Array === args[0] && Array === args[0][0] && Array === args[0][0][0]
-        self.coordinates = Coordinate.from *args
+        self.coordinates = Coordinate.from_array *args
 
       else
         super *args

@@ -10,12 +10,12 @@ module Terraformer
 
     class << self
 
-      def from arys
-        arys.map {|e| Coordinate.from_array e}
-      end
-
       def from_array a
-        Coordinate.__send__ Numeric === a[0] ? :new : :from, a
+        if Numeric === a[0]
+          Coordinate.new a
+        else
+          a.map {|e| Coordinate.from_array e}
+        end
       end
 
       def big_decimal n

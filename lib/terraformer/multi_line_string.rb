@@ -7,7 +7,7 @@ module Terraformer
       when Coordinate === args[0] # only one
         self.coordinates = [Coordinate.from_array(args)]
       when Array === args[0] # multiple?
-        self.coordinates = Coordinate.from args
+        self.coordinates = Coordinate.from_array args
       when LineString === args[0]
         self.coordinates = args.map &:coordinates
       else

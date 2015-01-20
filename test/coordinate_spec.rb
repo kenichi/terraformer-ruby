@@ -2,35 +2,6 @@ require_relative './helper'
 
 describe Terraformer::Coordinate do
 
-  describe 'from' do
-    it 'should accept nested arrays' do
-      arys = [[100,0], [101,1], [102,2]]
-      c = Terraformer::Coordinate.from arys
-
-      c.class.must_equal Array
-      c[0].class.must_equal Terraformer::Coordinate
-      c[0].x.must_equal 100
-      c[0].y.must_equal 0
-      c[1].class.must_equal Terraformer::Coordinate
-      c[1].x.must_equal 101
-      c[1].y.must_equal 1
-      c[2].class.must_equal Terraformer::Coordinate
-      c[2].x.must_equal 102
-      c[2].y.must_equal 2
-    end
-
-    it 'should accept double nested arrays' do
-      arys = [[[100,0], [101,1]], [[102,2], [103,3]]]
-      c = Terraformer::Coordinate.from arys
-
-      c.class.must_equal Array
-      c[0].class.must_equal Array
-      c[0][0].class.must_equal Terraformer::Coordinate
-      c[0][0].x.must_equal 100
-      c[0][0].y.must_equal 0
-    end
-  end
-
   describe 'from_array' do
 
     it 'should be called from Array.to_c' do

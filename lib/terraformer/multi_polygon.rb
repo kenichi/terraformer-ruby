@@ -7,12 +7,12 @@ module Terraformer
 
       # arg is an array of arrays of polygon, holes
       when Array === args[0] && Array === args[0][0] && Array === args[0][0][0] && Array === args[0][0][0][0]
-        self.coordinates = Coordinate.from(*args)
+        self.coordinates = Coordinate.from_array(*args)
 
       when Coordinate === args[0] # only one
         self.coordinates = [[Coordinate.from_array(args)]]
       when Array === args[0] # multiple?
-        self.coordinates = [Coordinate.from(args)]
+        self.coordinates = [Coordinate.from_array(args)]
       when Polygon === args[0]
         self.coordinates = args.map &:coordinates
 
