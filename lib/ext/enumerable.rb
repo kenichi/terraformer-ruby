@@ -51,29 +51,4 @@ module Enumerable
   def rotate_until_first_equals obj
     rotate_until { at(0) == obj }
   end
-
-  def polygonally_equal_to? obj
-    raise ArgumentError unless Enumerable === obj
-    return false if self.length != obj.length
-
-    equal = true
-
-    # clone so can pop/rotate
-    me = self.clone
-    obj = obj.clone
-
-    # pop to drop the duplicate, polygon-closing, coordinate
-    me.pop
-    obj.pop
-
-    begin
-      obj.rotate_until_first_equals me[0]
-      equal = me == obj
-    rescue IndexError
-      equal = false
-    end
-
-    equal
-  end
-
 end
