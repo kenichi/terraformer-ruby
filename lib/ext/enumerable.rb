@@ -35,20 +35,4 @@ module Enumerable
     end
   end
 
-  def rotate_until &block
-    return if block[]
-    found = false
-    length.times do
-      push shift
-      if block[]
-        found = true
-        break
-      end
-    end
-    raise IndexError unless found
-  end
-
-  def rotate_until_first_equals obj
-    rotate_until { at(0) == obj }
-  end
 end

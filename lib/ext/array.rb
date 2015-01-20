@@ -1,5 +1,22 @@
 class Array
 
+  def rotate_until &block
+    return if block[]
+    found = false
+    length.times do
+      push shift
+      if block[]
+        found = true
+        break
+      end
+    end
+    raise IndexError unless found
+  end
+
+  def rotate_until_first_equals obj
+    rotate_until { at(0) == obj }
+  end
+
   def slice_exists? slice
     start = slice.first
     len = slice.size
