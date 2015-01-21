@@ -2,6 +2,15 @@ module Terraformer
 
   class Point < Geometry
 
+    def initialize *args
+      super
+
+      # must be a single point
+      unless Terraformer::Coordinate === coordinates
+        raise ArgumentError.new 'invalid coordinates for Terraformer::Point'
+      end
+    end
+
     def first_coordinate
       coordinates
     end
