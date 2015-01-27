@@ -120,10 +120,10 @@ module Terraformer
       @geometries ||= []
     end
 
-    def to_hash
+    def to_hash *args
       {
         type: type,
-        geometries: geometries.map(&:to_hash)
+        geometries: geometries.map {|g| g.to_hash *args}
       }
     end
 
