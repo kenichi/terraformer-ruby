@@ -98,53 +98,68 @@ module Terraformer
         end
       end
 
+      def parse_point arcgis
+        Coordinate.new(%w[x y z].map {|k| arcgis[k]}).to_point
+      end
+
+      def parse_points arcgis
+        require_array arcgis['points']
+        MultiPoint.new arcgis['points']
+      end
+
+      def parse_paths arcgis
+        require_array arcgis['paths']
+        if arcgis['paths'].length == 1
+          LineString.new arcgis['paths'][0]
+        else
+          MultiLineString.new arcgis['paths']
+        end
+      end
+
+      def parse_geometry arcgis, opts
+        if arcgis['compressedGeometry']
+          arcgis['geometry'] = {'paths' => [decompress_geometry(arcgis['compressedGeometry'])]}
+        end
+
+        o = Feature.new
+        o.geometry = parse arcgis['geometry'] if arcgis['geometry']
+        if attrs = arcgis['attributes']
+          o.properties = attrs.clone
+          if opts[:id_attribute] && o.properties[opts[:id_attribute]]
+            o.id = o.properties.delete opts[:id_attribute]
+          elsif o.properties[OBJECT_ID]
+            o.id = o.properties.delete OBJECT_ID
+          elsif o.properties['FID']
+            o.id = o.properties.delete 'FID'
+          end
+        end
+
+        return o
+      end
+
       def parse arcgis, opts = {}
         arcgis = JSON.parse arcgis if String === arcgis
         raise ArgumentError.new 'argument not hash nor json' unless Hash === arcgis
 
         obj = case
               when Numeric === arcgis['x'] && Numeric === arcgis['y']
-                Coordinate.new(%w[x y z].map {|k| arcgis[k]}).to_point
+                parse_point arcgis
 
               when arcgis['points']
-                require_array arcgis['points']
-                MultiPoint.new arcgis['points']
+                parse_points arcgis
 
               when arcgis['paths']
-                require_array arcgis['paths']
-                if arcgis['paths'].length == 1
-                  LineString.new arcgis['paths'][0]
-                else
-                  MultiLineString.new arcgis['paths']
-                end
+                parse_paths arcgis
 
               when arcgis['rings']
                 convert_rings arcgis['rings']
 
               when !(%w[compressedGeometry geometry attributes].map {|k| arcgis[k]}.empty?)
-
-                if arcgis['compressedGeometry']
-                  arcgis['geometry'] = {'paths' => [decompress_geometry(arcgis['compressedGeometry'])]}
-                end
-
-                o = Feature.new
-                o.geometry = parse arcgis['geometry'] if arcgis['geometry']
-                if attrs = arcgis['attributes']
-                  o.properties = attrs.clone
-                  if opts[:id_attribute] and o.properties[opts[:id_attribute]]
-                    o.id = o.properties.delete opts[:id_attribute]
-                  elsif o.properties[OBJECT_ID]
-                    o.id = o.properties.delete OBJECT_ID
-                  elsif o.properties['FID']
-                    o.id = o.properties.delete 'FID'
-                  end
-                end
-                o
-
+                parse_geometry arcgis, opts
               end
 
         isr = arcgis['geometry'] ? arcgis['geometry']['spatialReference'] : arcgis['spatialReference']
-        if isr and Integer(isr['wkid']) == 102100
+        if isr && Integer(isr['wkid']) == 102100
           if Feature === obj
             obj.geometry = obj.geometry.to_geographic
           else
