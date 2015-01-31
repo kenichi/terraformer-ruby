@@ -10,6 +10,19 @@ describe Terraformer::Geometry do
         c = Terraformer::Coordinate.new -122.6764, 45.5165
         p = Terraformer::Point.new c
         p.must_be_valid_geojson
+        p.to_json.must_equal '{"type":"Point","coordinates":[-122.6764,45.5165]}'
+      end
+
+      it 'constructs from array' do
+        p = Terraformer::Point.new [-122.6764, 45.5165]
+        p.must_be_valid_geojson
+        p.to_json.must_equal '{"type":"Point","coordinates":[-122.6764,45.5165]}'
+      end
+
+      it 'costructs from numeric' do
+        p = Terraformer::Point.new -122.6764, 45.5165
+        p.must_be_valid_geojson
+        p.to_json.must_equal '{"type":"Point","coordinates":[-122.6764,45.5165]}'
       end
 
     end
@@ -20,6 +33,7 @@ describe Terraformer::Geometry do
         a = Terraformer::Coordinate.new -122.6764, 45.5165
         b = a + [0.02, 0.02]
         mp = Terraformer::MultiPoint.new a, b
+        mp.to_json.must_equal '{"type":"MultiPoint","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365]]}'
         mp.must_be_valid_geojson
       end
 
@@ -27,6 +41,19 @@ describe Terraformer::Geometry do
         a = Terraformer::Coordinate.new -122.6764, 45.5165
         b = a + [0.02, 0.02]
         mp = Terraformer::MultiPoint.new a.to_point, b.to_point
+        mp.to_json.must_equal '{"type":"MultiPoint","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365]]}'
+        mp.must_be_valid_geojson
+      end
+
+      it 'constructs from array' do
+        mp = Terraformer::MultiPoint.new [[-122.6764, 45.5165],[-122.6564, 45.5365]]
+        mp.to_json.must_equal '{"type":"MultiPoint","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365]]}'
+        mp.must_be_valid_geojson
+      end
+
+      it 'constructs from multiple point arrays' do
+        mp = Terraformer::MultiPoint.new [-122.6764, 45.5165],[-122.6564, 45.5365]
+        mp.to_json.must_equal '{"type":"MultiPoint","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365]]}'
         mp.must_be_valid_geojson
       end
 
@@ -39,6 +66,19 @@ describe Terraformer::Geometry do
         b = a + [0.02, 0.02]
         c = b + [0.1, -0.1]
         ls = Terraformer::LineString.new a, b, c
+        ls.to_json.must_equal '{"type":"LineString","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]}'
+        ls.must_be_valid_geojson
+      end
+
+      it 'constructs from array' do
+        ls = Terraformer::LineString.new [[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]
+        ls.to_json.must_equal '{"type":"LineString","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]}'
+        ls.must_be_valid_geojson
+      end
+
+      it 'constructs from array of points' do
+        ls = Terraformer::LineString.new [-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]
+        ls.to_json.must_equal '{"type":"LineString","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]}'
         ls.must_be_valid_geojson
       end
 
@@ -51,6 +91,15 @@ describe Terraformer::Geometry do
         b = a + [0.02, 0.02]
         c = b + [0.1, -0.1]
         mls = Terraformer::MultiLineString.new a, b, c
+        mls.to_json.must_equal '{"type":"MultiLineString","coordinates":[[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]]}'
+        mls.must_be_valid_geojson
+      end
+
+      it 'constructs from array - single line' do
+        ## unlike point, multipoint and linestring, passing in the coordinates array directly into multilinestring doesn't work
+        # mls = Terraformer::MultiLineString.new [[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]]
+        mls = Terraformer::MultiLineString.new [[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]
+        mls.to_json.must_equal '{"type":"MultiLineString","coordinates":[[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]]}'
         mls.must_be_valid_geojson
       end
 
@@ -62,6 +111,7 @@ describe Terraformer::Geometry do
         e = d + [0.02, 0.02]
         f = e + [0.1, -0.1]
         mls = Terraformer::MultiLineString.new [a, b, c], [d, e, f]
+        mls.to_json.must_equal '{"type":"MultiLineString","coordinates":[[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]],[[-121.5564,46.4365],[-121.5364,46.4565],[-121.4364,46.3565]]]}'
         mls.must_be_valid_geojson
       end
 
@@ -75,6 +125,15 @@ describe Terraformer::Geometry do
         ls_1 = Terraformer::LineString.new a, b, c
         ls_2 = Terraformer::LineString.new d, e, f
         mls = Terraformer::MultiLineString.new ls_1, ls_2
+        mls.to_json.must_equal '{"type":"MultiLineString","coordinates":[[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]],[[-121.5564,46.4365],[-121.5364,46.4565],[-121.4364,46.3565]]]}'
+        mls.must_be_valid_geojson
+      end
+
+      it 'constructs from array - multiple lines' do
+        ## unlike point, multipoint and linestring, passing in the coordinates array directly into multilinestring doesn't work
+        # mls = Terraformer::MultiLineString.new [[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]],[[-121.5564,46.4365],[-121.5364,46.4565],[-121.4364,46.3565]]]
+        mls = Terraformer::MultiLineString.new [[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]],[[-121.5564,46.4365],[-121.5364,46.4565],[-121.4364,46.3565]]
+        mls.to_json.must_equal '{"type":"MultiLineString","coordinates":[[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]],[[-121.5564,46.4365],[-121.5364,46.4565],[-121.4364,46.3565]]]}'
         mls.must_be_valid_geojson
       end
 
@@ -88,6 +147,7 @@ describe Terraformer::Geometry do
         c = b + [0.02, 0]
         d = c + [0, -0.02]
         p = Terraformer::Polygon.new a, b, c, d, a
+        p.to_json.must_equal '{"type":"Polygon","coordinates":[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]]}'
         p.must_be_valid_geojson
       end
 
@@ -97,6 +157,13 @@ describe Terraformer::Geometry do
         c = b + [0.02, 0]
         d = c + [0, -0.02]
         p = Terraformer::Polygon.new [a, b, c, d, a]
+        p.to_json.must_equal '{"type":"Polygon","coordinates":[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]]}'
+        p.must_be_valid_geojson
+      end
+
+      it 'constructs from array' do
+        p = Terraformer::Polygon.new [[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]]
+        p.to_json.must_equal '{"type":"Polygon","coordinates":[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]]}'
         p.must_be_valid_geojson
       end
 
@@ -113,6 +180,13 @@ describe Terraformer::Geometry do
           [ -122.67072200775145, 45.52438983143154 ]
         ].map {|c| Terraformer::Coordinate.new c}
         p = Terraformer::Polygon.new [a, b, c, d, a], hole
+        p.to_json.must_equal '{"type":"Polygon","coordinates":[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]],[[-122.67072200775145,45.52438983143154],[-122.67072200775145,45.53241707548722],[-122.6617956161499,45.53241707548722],[-122.6617956161499,45.52438983143154],[-122.67072200775145,45.52438983143154]]]}'
+        p.must_be_valid_geojson
+      end
+
+      it 'constructs with holes from array' do
+        p = Terraformer::Polygon.new [[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]],[[-122.67072200775145,45.52438983143154],[-122.67072200775145,45.53241707548722],[-122.6617956161499,45.53241707548722],[-122.6617956161499,45.52438983143154],[-122.67072200775145,45.52438983143154]]]
+        p.to_json.must_equal '{"type":"Polygon","coordinates":[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]],[[-122.67072200775145,45.52438983143154],[-122.67072200775145,45.53241707548722],[-122.6617956161499,45.53241707548722],[-122.6617956161499,45.52438983143154],[-122.67072200775145,45.52438983143154]]]}'
         p.must_be_valid_geojson
       end
 
@@ -126,6 +200,7 @@ describe Terraformer::Geometry do
         c = b + [0.02, 0]
         d = c + [0, -0.02]
         mp = Terraformer::MultiPolygon.new a, b, c, d, a
+        mp.to_json.must_equal '{"type":"MultiPolygon","coordinates":[[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]]]}'
         mp.must_be_valid_geojson
       end
 
@@ -135,6 +210,13 @@ describe Terraformer::Geometry do
         c = b + [0.02, 0]
         d = c + [0, -0.02]
         mp = Terraformer::MultiPolygon.new [a, b, c, d, a]
+        mp.to_json.must_equal '{"type":"MultiPolygon","coordinates":[[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]]]}'
+        mp.must_be_valid_geojson
+      end
+
+      it 'constructs from array - single polygon' do
+        mp = Terraformer::MultiPolygon.new [[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]]]
+        mp.to_json.must_equal '{"type":"MultiPolygon","coordinates":[[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]]]}'
         mp.must_be_valid_geojson
       end
 
@@ -151,6 +233,13 @@ describe Terraformer::Geometry do
           [ -122.67072200775145, 45.52438983143154 ]
         ].map {|c| Terraformer::Coordinate.new c}
         mp = Terraformer::MultiPolygon.new [a, b, c, d, a], hole
+        mp.to_json.must_equal '{"type":"MultiPolygon","coordinates":[[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]],[[-122.67072200775145,45.52438983143154],[-122.67072200775145,45.53241707548722],[-122.6617956161499,45.53241707548722],[-122.6617956161499,45.52438983143154],[-122.67072200775145,45.52438983143154]]]]}'
+        mp.must_be_valid_geojson
+      end
+
+      it 'constructs from array - single polygon with hole' do
+        mp = Terraformer::MultiPolygon.new [[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]],[[-122.67072200775145,45.52438983143154],[-122.67072200775145,45.53241707548722],[-122.6617956161499,45.53241707548722],[-122.6617956161499,45.52438983143154],[-122.67072200775145,45.52438983143154]]]]
+        mp.to_json.must_equal '{"type":"MultiPolygon","coordinates":[[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]],[[-122.67072200775145,45.52438983143154],[-122.67072200775145,45.53241707548722],[-122.6617956161499,45.53241707548722],[-122.6617956161499,45.52438983143154],[-122.67072200775145,45.52438983143154]]]]}'
         mp.must_be_valid_geojson
       end
 
@@ -173,6 +262,13 @@ describe Terraformer::Geometry do
         ].map {|c| Terraformer::Coordinate.new c}
         p_2 = Terraformer::Polygon.new [a, b, c, d, a], hole
         mp = Terraformer::MultiPolygon.new p_1, p_2
+        mp.to_json.must_equal '{"type":"MultiPolygon","coordinates":[[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]],[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]],[[-122.67072200775145,45.52438983143154],[-122.67072200775145,45.53241707548722],[-122.6617956161499,45.53241707548722],[-122.6617956161499,45.52438983143154],[-122.67072200775145,45.52438983143154]]]]}'
+        mp.must_be_valid_geojson
+      end
+
+      it 'constructs from array - multi polygons with hole' do
+        mp = Terraformer::MultiPolygon.new [[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]],[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]],[[-122.67072200775145,45.52438983143154],[-122.67072200775145,45.53241707548722],[-122.6617956161499,45.53241707548722],[-122.6617956161499,45.52438983143154],[-122.67072200775145,45.52438983143154]]]]
+        mp.to_json.must_equal '{"type":"MultiPolygon","coordinates":[[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]],[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]],[[-122.67072200775145,45.52438983143154],[-122.67072200775145,45.53241707548722],[-122.6617956161499,45.53241707548722],[-122.6617956161499,45.52438983143154],[-122.67072200775145,45.52438983143154]]]]}'
         mp.must_be_valid_geojson
       end
 
