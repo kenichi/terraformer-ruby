@@ -396,7 +396,7 @@ describe Terraformer::Geometry do
         ]
       }'
       b = Terraformer.parse '{
-        "type": "LineString",
+        "type": "MultiLineString",
         "coordinates": [
           [
             [
