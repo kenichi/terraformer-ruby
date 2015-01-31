@@ -4,29 +4,6 @@ describe Terraformer::Geometry do
 
   describe 'construction' do
 
-    describe Terraformer::Point do
-
-      it 'constructs from coordinate' do
-        c = Terraformer::Coordinate.new -122.6764, 45.5165
-        p = Terraformer::Point.new c
-        p.must_be_valid_geojson
-        p.to_json.must_equal '{"type":"Point","coordinates":[-122.6764,45.5165]}'
-      end
-
-      it 'constructs from array' do
-        p = Terraformer::Point.new [-122.6764, 45.5165]
-        p.must_be_valid_geojson
-        p.to_json.must_equal '{"type":"Point","coordinates":[-122.6764,45.5165]}'
-      end
-
-      it 'costructs from numeric' do
-        p = Terraformer::Point.new -122.6764, 45.5165
-        p.must_be_valid_geojson
-        p.to_json.must_equal '{"type":"Point","coordinates":[-122.6764,45.5165]}'
-      end
-
-    end
-
     describe Terraformer::MultiPoint do
 
       it 'constructs from coordinates' do
