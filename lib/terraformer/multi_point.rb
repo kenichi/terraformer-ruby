@@ -48,20 +48,20 @@ module Terraformer
 
     def add_point p
       p = p.coordinates if Point === p
-      raise ArugmentError unless Coordinate === p
+      raise ArgumentError unless Coordinate === p
       coordinates << p
     end
     alias_method :<<, :add_point
 
     def insert_point idx, p
       p = p.coordinates if Point === p
-      raise ArugmentError unless Coordinate === p
+      raise ArgumentError unless Coordinate === p
       coordinates.insert idx, p
     end
 
     def remove_point p
       p = p.coordinates if Point === p
-      raise ArugmentError unless Coordinate === p
+      raise ArgumentError unless Coordinate === p
       coordinates.delete p
     end
 
