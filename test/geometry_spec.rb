@@ -4,31 +4,6 @@ describe Terraformer::Geometry do
 
   describe 'construction' do
 
-    describe Terraformer::LineString do
-
-      it 'constructs from coordinates' do
-        a = Terraformer::Coordinate.new -122.6764, 45.5165
-        b = a + [0.02, 0.02]
-        c = b + [0.1, -0.1]
-        ls = Terraformer::LineString.new a, b, c
-        ls.to_json.must_equal '{"type":"LineString","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]}'
-        ls.must_be_valid_geojson
-      end
-
-      it 'constructs from array' do
-        ls = Terraformer::LineString.new [[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]
-        ls.to_json.must_equal '{"type":"LineString","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]}'
-        ls.must_be_valid_geojson
-      end
-
-      it 'constructs from array of points' do
-        ls = Terraformer::LineString.new [-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]
-        ls.to_json.must_equal '{"type":"LineString","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]}'
-        ls.must_be_valid_geojson
-      end
-
-    end
-
     describe Terraformer::MultiLineString do
 
       it 'constructs from coordinates' do
