@@ -4,38 +4,6 @@ describe Terraformer::Geometry do
 
   describe 'construction' do
 
-    describe Terraformer::MultiPoint do
-
-      it 'constructs from coordinates' do
-        a = Terraformer::Coordinate.new -122.6764, 45.5165
-        b = a + [0.02, 0.02]
-        mp = Terraformer::MultiPoint.new a, b
-        mp.to_json.must_equal '{"type":"MultiPoint","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365]]}'
-        mp.must_be_valid_geojson
-      end
-
-      it 'constructs from Point objects' do
-        a = Terraformer::Coordinate.new -122.6764, 45.5165
-        b = a + [0.02, 0.02]
-        mp = Terraformer::MultiPoint.new a.to_point, b.to_point
-        mp.to_json.must_equal '{"type":"MultiPoint","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365]]}'
-        mp.must_be_valid_geojson
-      end
-
-      it 'constructs from array' do
-        mp = Terraformer::MultiPoint.new [[-122.6764, 45.5165],[-122.6564, 45.5365]]
-        mp.to_json.must_equal '{"type":"MultiPoint","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365]]}'
-        mp.must_be_valid_geojson
-      end
-
-      it 'constructs from multiple point arrays' do
-        mp = Terraformer::MultiPoint.new [-122.6764, 45.5165],[-122.6564, 45.5365]
-        mp.to_json.must_equal '{"type":"MultiPoint","coordinates":[[-122.6764,45.5165],[-122.6564,45.5365]]}'
-        mp.must_be_valid_geojson
-      end
-
-    end
-
     describe Terraformer::LineString do
 
       it 'constructs from coordinates' do
