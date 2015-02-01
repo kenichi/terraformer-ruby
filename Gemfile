@@ -7,4 +7,5 @@ group :test do
   gem 'pry', '~>0.10'
   gem 'pry-nav', '~>0.2'
   gem 'ruby-prof', '~>0.15'
+  gem 'simplecov', :require => false
 end
