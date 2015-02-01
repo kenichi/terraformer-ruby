@@ -23,4 +23,15 @@ describe Terraformer::ConvexHull do
     ch.must_be_valid_geojson
   end
 
+  it 'works on feature collections - jarvis march' do
+    Terraformer::ConvexHull.impl = :jarvis_march
+
+    fc = Terraformer::FeatureCollection.new
+    fc << Terraformer.parse(EXAMPLES[:waldocanyon])
+    fc << Terraformer.parse(EXAMPLES[:sf_county]).to_feature
+    ch = fc.convex_hull
+    ch.dont_be_terrible_ok
+    ch.must_be_valid_geojson
+  end
+
 end
