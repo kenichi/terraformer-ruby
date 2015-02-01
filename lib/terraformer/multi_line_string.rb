@@ -28,14 +28,9 @@ module Terraformer
 
     def == obj
       super obj do |o|
-        equal = true
-        lses = line_strings.sort
-        olses = o.line_strings.sort
-        lses.each_with_index do |ls, i|
-          equal = ls == olses[i]
-          break unless equal
-        end
-        equal
+        lses = line_strings.sort {|a,b| a.first_coordinate <=> b.first_coordinate }
+        olses = o.line_strings.sort {|a,b| a.first_coordinate <=> b.first_coordinate }
+        lses == olses
       end
     end
 
