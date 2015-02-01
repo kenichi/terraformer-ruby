@@ -5,7 +5,6 @@ require 'bigdecimal/util'
 require 'ext/array'
 require 'ext/big_decimal'
 require 'ext/big_math'
-require 'ext/enumerable'
 require 'forwardable'
 
 # terraformer.rb - a toolkit for working with geojson in ruby

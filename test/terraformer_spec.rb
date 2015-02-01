@@ -163,7 +163,7 @@ describe Terraformer do
         a = d.split
         a[1][a[3]..-1].length
       }
-      c.coordinates.each_coordinate do |c|
+      c.each_coordinate do |c|
         splitter[c.x].must_be :<=, Terraformer::PRECISION
         splitter[c.x].must_be :<=, Terraformer::PRECISION
       end

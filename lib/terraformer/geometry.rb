@@ -22,6 +22,28 @@ module Terraformer
       end
     end
 
+    def each_coordinate &block
+      Geometry.iter_coordinate coordinates, :each, &block
+    end
+
+    def map_coordinate &block
+      Geometry.iter_coordinate coordinates, :map, &block
+    end
+
+    def self.iter_coordinate obj, meth, &block
+      if Terraformer::Coordinate === obj
+        block.call obj
+      elsif Array === obj
+        obj.__send__ meth do |pair|
+          if Array === pair
+            Geometry.iter_coordinate pair, meth, &block
+          else
+            block.call pair
+          end
+        end
+      end
+    end
+
     def to_hash *args
       h = {
         type: type,
@@ -33,11 +55,11 @@ module Terraformer
     end
 
     def to_mercator
-      self.class.new *coordinates.map_coordinate(&:to_mercator)
+      self.class.new *map_coordinate(&:to_mercator)
     end
 
     def to_geographic
-      self.class.new *coordinates.map_coordinate(&:to_geographic)
+      self.class.new *map_coordinate(&:to_geographic)
     end
 
     def to_feature
