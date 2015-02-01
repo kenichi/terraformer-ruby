@@ -3,19 +3,22 @@ module Terraformer
   class Polygon < Geometry
 
     def initialize *args
-      case
 
       # each arg is a position of the polygon
-      when Coordinate === args[0] || (Array === args[0] && Numeric === args[0][0])
+      if Coordinate === args[0] || (Array === args[0] && Numeric === args[0][0])
         self.coordinates = [Coordinate.from_array(args)]
 
-      # each arg is an array of positions; first is polygon, rest are "holes"
-      when Array === args[0] && Array === args[0][0] && Numeric === args[0][0][0]
-        self.coordinates = Coordinate.from_array args
+      elsif Array === args[0]
 
-      # arg is an array of polygon, holes
-      when Array === args[0] && Array === args[0][0] && Array === args[0][0][0]
-        self.coordinates = Coordinate.from_array *args
+        # each arg is an array of positions; first is polygon, rest are "holes"
+        if Coordinate === args[0][0] ||
+           Array === args[0][0] && Numeric === args[0][0][0]
+          self.coordinates = Coordinate.from_array args
+
+        # arg is an array of polygon, holes
+        elsif Array === args[0][0] && Array === args[0][0][0]
+          self.coordinates = Coordinate.from_array *args
+        end
 
       else
         super *args
@@ -132,6 +135,11 @@ module Terraformer
 
 
     def self.polygonally_equal? a, b
+      if Terraformer::Coordinate === a ||
+         Terraformer::Coordinate === b
+        return a == b
+      end
+
       raise ArgumentError unless Enumerable === a
       raise ArgumentError unless Enumerable === b
 

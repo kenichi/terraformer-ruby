@@ -13,7 +13,7 @@ module Terraformer
       case
       when args.length > 1
         self.coordinates = Coordinate.from_array args
-      when Array === args[0]
+      when Array === args[0] || Coordinate === args[0]
         self.coordinates = Coordinate.from_array args[0]
       else
         super *args do |arg|

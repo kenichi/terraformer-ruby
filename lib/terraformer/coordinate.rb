@@ -1,6 +1,6 @@
 module Terraformer
 
-  class Coordinate < ::Array
+  class Coordinate
 
     # http://en.wikipedia.org/wiki/Earth_radius#Mean_radius
     #
@@ -8,13 +8,20 @@ module Terraformer
 
     attr_accessor :crs
 
+    # array holding the numeric coordinate values
+    attr_accessor :ary
+
     class << self
 
       def from_array a
-        if Numeric === a[0]
+        if Coordinate === a
+          a.dup
+        elsif Numeric === a[0]
           Coordinate.new a
+        elsif Array === a
+          a.map {|e| Coordinate.from_array e }
         else
-          a.map {|e| Coordinate.from_array e}
+          raise ArgumentError
         end
       end
 
@@ -34,14 +41,21 @@ module Terraformer
     end
 
     def initialize _x, _y = nil, _z = nil
-      super 3
-      case
-      when Array === _x
+      @ary = Array.new 3
+      case _x
+      when Array
         raise ArgumentError if _y
         self.x = _x[0]
         self.y = _x[1]
         self.z = _x[2] if _x[2]
-      when Numeric === _x || String === _x
+
+      when Coordinate
+        raise ArgumentError if _y
+        self.x = _x.x
+        self.y = _x.y
+        self.z = _x.z if _x.z
+
+      when Numeric, String
         raise ArgumentError unless _y
         self.x = _x
         self.y = _y
@@ -51,32 +65,53 @@ module Terraformer
       end
     end
 
-    def x
-      self[0]
+    def dup
+      Coordinate.new @ary.dup
     end
 
+    def x
+      @ary[0]
+    end
+    alias_method :lon, :x
+
     def x= _x
-      self[0] = Coordinate.big_decimal _x
+      @ary[0] = Coordinate.big_decimal _x
     end
 
     def y
-      self[1]
+      @ary[1]
     end
+    alias_method :lat, :y
 
     def y= _y
-      self[1] = Coordinate.big_decimal _y
+      @ary[1] = Coordinate.big_decimal _y
     end
 
     def z
-      self[2]
+      @ary[2]
     end
 
     def z= _z
-      self[2] = Coordinate.big_decimal _z
+      @ary[2] = Coordinate.big_decimal _z
     end
 
-    [:<<, :*, :&, :|].each do |sym|
-      define_method(sym){|*a| raise NotImplementedError }
+    def [] index
+      @ary[index]
+    end
+
+    def == other
+      case other
+      when Array
+        @ary == other
+      when Coordinate
+        @ary == other.ary
+      else
+        false
+      end
+    end
+
+    def inspect
+      "#<Terraformer::Coordinate lon=#{lon.to_s 'F'} lat=#{lat.to_s 'F'} #{z if z }>"
     end
 
     def to_geographic
@@ -101,11 +136,11 @@ module Terraformer
     end
 
     def to_s
-      [x,y,z].compact.join ','
+      @ary.compact.join ','
     end
 
     def to_json *args
-      compact.to_json(*args)
+      @ary.compact.to_json(*args)
     end
 
     def to_point

@@ -6,6 +6,10 @@ module Terraformer
     module ClassMethods
 
       def coordinates_contain_point? coordinates, point
+        if Terraformer::Coordinate === coordinates
+          return coordinates == point
+        end
+
         contains = false
         i = -1
         l = coordinates.length
