@@ -2,7 +2,7 @@ require_relative './helper'
 
 describe Terraformer::ConvexHull do
 
-  EXAMPLES.not(:multi_line_string).each do |key, geo|
+  EXAMPLES.reject {|k,v| k == :multi_line_string }.each do |key, geo|
     it "works on #{key}" do
       ch = Terraformer.parse(geo).convex_hull
       ch.dont_be_terrible_ok
