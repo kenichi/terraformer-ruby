@@ -107,8 +107,9 @@ module Terraformer
           raise ArgumentError.new "unsupported type: #{e.type rescue e.class}"
         end
       end
-      return true if begin
-        within? other or other.within? self
+
+      begin
+        return true if within? other or other.within? self
       rescue ArgumentError
         false
       end
