@@ -13,6 +13,12 @@ module Terraformer
       else
         super *args
       end
+
+      unless Array === coordinates &&
+             Array === coordinates[0] &&
+             Terraformer::Coordinate === coordinates[0][0]
+        raise ArgumentError.new 'invalid coordinates for Terraformer::MultiLineString'
+      end
     end
 
     def first_coordinate
