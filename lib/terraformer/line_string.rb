@@ -2,6 +2,15 @@ module Terraformer
 
   class LineString < Geometry
 
+    def initialize *args
+      super *args
+
+      unless Array === coordinates &&
+             Terraformer::Coordinate === coordinates[0]
+        raise ArgumentError.new 'invalid coordinates for Terraformer::LineString'
+      end
+    end
+
     def first_coordinate
       coordinates[0]
     end
