@@ -109,6 +109,23 @@ describe Terraformer::Coordinate do
       #c.to_s.must_equal '100,0,0'
     end
 
+    it 'accepts strings as params: x,y' do
+      c = Terraformer::Coordinate.new '100', '0'
+
+      c.x.must_equal 100
+      c.y.must_equal 0
+      c.z.must_equal nil
+      #c.to_s.must_equal '100,0'
+    end
+
+    it 'accepts strings as params: x,y,z' do
+      c = Terraformer::Coordinate.new '100', '0', '0'
+
+      c.x.must_equal 100
+      c.y.must_equal 0
+      c.z.must_equal 0
+      #c.to_s.must_equal '100,0,0'
+    end
     it 'accepts an array as params: x,y' do
       c = Terraformer::Coordinate.new [100, 0]
 
@@ -140,85 +157,112 @@ describe Terraformer::Coordinate do
         Terraformer::Coordinate.new {}
       end
     end
+
+    it 'does not allow invalid types' do
+      assert_raises ArgumentError do
+        Terraformer::Coordinate.new :foo, :bar
+      end
+    end
+
   end
 
-  describe 'equality' do
-    it 'should be equal' do
-      c1 = Terraformer::Coordinate.new 100, 0
-      c2 = Terraformer::Coordinate.new 100, 0
-
-      c1.must_equal c2
+  describe 'methods' do
+    before :each do
+      @c = Terraformer::Coordinate.new 100, 0, 0
     end
 
-    it 'should not be equal' do
-      c1 = Terraformer::Coordinate.new 100, 0
-      c2 = Terraformer::Coordinate.new 101, 0
+    describe 'modification' do
 
-      c1.wont_equal c2
-    end
-  end
+      it 'should allow modification of x' do
+        @c.x = 101
+        @c.x.must_equal 101
 
-  describe 'maths' do
-    it 'should add' do
-      c = Terraformer::Coordinate.new 100, 0
-      c = c + [1, 1]
+        @c.x = '102'
+        @c.x.must_equal 102
 
-      c.x.must_equal 101
-      c.y.must_equal 1
-    end
+        assert_raises ArgumentError do
+          @c.x = :foo
+        end
+      end
 
-    it 'should subtract' do
-      c = Terraformer::Coordinate.new 100, 0
-      c = c - [1, 1]
+      it 'should allow modification of y' do
+        @c.y = 101
+        @c.y.must_equal 101
 
-      c.x.must_equal 99
-      c.y.must_equal -1
-    end
+        @c.y = '102'
+        @c.y.must_equal 102
 
-    it 'should calculate euclidean distance' do
-      c1 = Terraformer::Coordinate.new 100, 0
-      c2 = Terraformer::Coordinate.new 102, 2
-
-      ed = c1.euclidean_distance_to(c2)
-      ed.to_s('F').must_equal "2.82842712474619"
+        assert_raises ArgumentError do
+          @c.y = :foo
+        end
+      end
     end
 
-    it 'should calculate squared euclidean distance' do
-      c1 = Terraformer::Coordinate.new 100, 0
-      c2 = Terraformer::Coordinate.new 102, 2
+    describe 'equality' do
 
-      ed = c1.squared_euclidean_distance_to(c2)
-      ed.to_s('F').must_equal "8.0"
+      it 'should be equal' do
+        c2 = Terraformer::Coordinate.new 100, 0, 0
+        @c.must_equal c2
+      end
+
+      it 'should not be equal' do
+        c2 = Terraformer::Coordinate.new 101, 0, 0
+        @c.wont_equal c2
+      end
     end
 
-    it 'should calculate haversine distance' do
-      c1 = Terraformer::Coordinate.new 100, 0
-      c2 = Terraformer::Coordinate.new 102, 2
+    describe 'maths' do
+      before :each do
+        @c2 = Terraformer::Coordinate.new 102, 2
+      end
 
-      ed = c1.haversine_distance_to(c2)
-      ed.to_s('F').must_equal "314475.2493440403"
-    end
+      it 'should add' do
+        @c = @c + [1, 1]
 
-    it 'should calculate distance and bearing' do
-      c1 = Terraformer::Coordinate.new 100, 0
-      c2 = Terraformer::Coordinate.new 102, 2
+        @c.x.must_equal 101
+        @c.y.must_equal 1
+      end
 
-      db = c1.distance_and_bearing_to(c2)
-      db.class.must_equal Hash
+      it 'should subtract' do
+        @c = @c - [1, 1]
 
-      db[:distance].to_s('F').must_equal "314037.6739419673"
-      db[:bearing][:initial].to_s('F').must_equal "45.17484844056842"
-      db[:bearing][:final].to_s('F').must_equal "45.20976211316248"
+        @c.x.must_equal 99
+        @c.y.must_equal -1
+      end
 
-      d = c1.distance_to c2
-      d.must_equal db[:distance]
+      it 'should calculate euclidean distance' do
+        ed = @c.euclidean_distance_to(@c2)
+        ed.to_s('F').must_equal "2.82842712474619"
+      end
 
-      ib = c1.initial_bearing_to c2
-      ib.must_equal db[:bearing][:initial]
+      it 'should calculate squared euclidean distance' do
+        ed = @c.squared_euclidean_distance_to(@c2)
+        ed.to_s('F').must_equal "8.0"
+      end
 
-      fb = c1.final_bearing_to c2
-      fb.must_equal db[:bearing][:final]
+      it 'should calculate haversine distance' do
+        ed = @c.haversine_distance_to(@c2)
+        ed.to_s('F').must_equal "314475.2493440403"
+      end
 
+      it 'should calculate distance and bearing' do
+        db = @c.distance_and_bearing_to(@c2)
+        db.class.must_equal Hash
+
+        db[:distance].to_s('F').must_equal "314037.6739419673"
+        db[:bearing][:initial].to_s('F').must_equal "45.17484844056842"
+        db[:bearing][:final].to_s('F').must_equal "45.20976211316248"
+
+        d = @c.distance_to @c2
+        d.must_equal db[:distance]
+
+        ib = @c.initial_bearing_to @c2
+        ib.must_equal db[:bearing][:initial]
+
+        fb = @c.final_bearing_to @c2
+        fb.must_equal db[:bearing][:final]
+
+      end
     end
   end
 end
