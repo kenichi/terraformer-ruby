@@ -24,6 +24,13 @@ module Terraformer
         super *args
       end
 
+      # must be an array of arrays of coordinates
+      unless Array === coordinates &&
+             Array === coordinates[0] &&
+             Terraformer::Coordinate === coordinates[0][0]
+        raise ArgumentError.new 'invalid coordinates for Terraformer::Polygon'
+      end
+
       if line_strings.map(&:linear_ring?).include? false
         raise ArgumentError.new 'not linear ring'
       end

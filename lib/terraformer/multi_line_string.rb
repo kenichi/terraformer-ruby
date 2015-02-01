@@ -11,6 +11,7 @@ module Terraformer
         super *args
       end
 
+      # must be an array of arrays of coordinates
       unless Array === coordinates &&
              Array === coordinates[0] &&
              Terraformer::Coordinate === coordinates[0][0]
