@@ -4,59 +4,6 @@ describe Terraformer::Geometry do
 
   describe 'construction' do
 
-    describe Terraformer::Polygon do
-
-      it 'constructs from coordinates' do
-        a = Terraformer::Coordinate.new -122.6764, 45.5165
-        b = a + [0, 0.02]
-        c = b + [0.02, 0]
-        d = c + [0, -0.02]
-        p = Terraformer::Polygon.new a, b, c, d, a
-        p.to_json.must_equal '{"type":"Polygon","coordinates":[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]]}'
-        p.must_be_valid_geojson
-      end
-
-      it 'constructs from coordinates array' do
-        a = Terraformer::Coordinate.new -122.6764, 45.5165
-        b = a + [0, 0.02]
-        c = b + [0.02, 0]
-        d = c + [0, -0.02]
-        p = Terraformer::Polygon.new [a, b, c, d, a]
-        p.to_json.must_equal '{"type":"Polygon","coordinates":[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]]}'
-        p.must_be_valid_geojson
-      end
-
-      it 'constructs from array' do
-        p = Terraformer::Polygon.new [[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]]
-        p.to_json.must_equal '{"type":"Polygon","coordinates":[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]]]}'
-        p.must_be_valid_geojson
-      end
-
-      it 'constructs with holes from coordinates arrays' do
-        a = Terraformer::Coordinate.new -122.6764, 45.5165
-        b = a + [0, 0.02]
-        c = b + [0.02, 0]
-        d = c + [0, -0.02]
-        hole = [
-          [ -122.67072200775145, 45.52438983143154 ],
-          [ -122.67072200775145, 45.53241707548722 ],
-          [ -122.6617956161499, 45.53241707548722 ],
-          [ -122.6617956161499, 45.52438983143154 ],
-          [ -122.67072200775145, 45.52438983143154 ]
-        ].map {|c| Terraformer::Coordinate.new c}
-        p = Terraformer::Polygon.new [a, b, c, d, a], hole
-        p.to_json.must_equal '{"type":"Polygon","coordinates":[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]],[[-122.67072200775145,45.52438983143154],[-122.67072200775145,45.53241707548722],[-122.6617956161499,45.53241707548722],[-122.6617956161499,45.52438983143154],[-122.67072200775145,45.52438983143154]]]}'
-        p.must_be_valid_geojson
-      end
-
-      it 'constructs with holes from array' do
-        p = Terraformer::Polygon.new [[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]],[[-122.67072200775145,45.52438983143154],[-122.67072200775145,45.53241707548722],[-122.6617956161499,45.53241707548722],[-122.6617956161499,45.52438983143154],[-122.67072200775145,45.52438983143154]]]
-        p.to_json.must_equal '{"type":"Polygon","coordinates":[[[-122.6764,45.5165],[-122.6764,45.5365],[-122.6564,45.5365],[-122.6564,45.5165],[-122.6764,45.5165]],[[-122.67072200775145,45.52438983143154],[-122.67072200775145,45.53241707548722],[-122.6617956161499,45.53241707548722],[-122.6617956161499,45.52438983143154],[-122.67072200775145,45.52438983143154]]]}'
-        p.must_be_valid_geojson
-      end
-
-    end
-
     describe Terraformer::MultiPolygon do
 
       it 'constructs from coordinates' do

@@ -110,7 +110,7 @@ module Terraformer
     end
 
     def add_vertex p
-      insert_vertex coordinates[0].length - 2, p
+      insert_vertex -2, p
     end
     alias_method :<<, :add_vertex
 
