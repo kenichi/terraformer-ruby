@@ -22,12 +22,12 @@ module Terraformer
       @properties ||= {}
     end
 
-    def to_hash
+    def to_hash *args
       h = {
         type: type,
         properties: properties,
       }
-      h[:geometry] = geometry.to_hash if geometry
+      h[:geometry] = geometry.to_hash(*args) if geometry
       h[:id] = id if id
       h
     end
@@ -77,10 +77,10 @@ module Terraformer
       features << feature
     end
 
-    def to_hash
+    def to_hash *args
       h = {
         type: type,
-        features: features.map(&:to_hash)
+        features: features.map {|f| f.to_hash *args}
       }
       h[:crs] = crs if crs
       h
