@@ -1,7 +1,7 @@
 terraformer-ruby
 ================
 
-[terraformer-ruby](https://github.com/kenichi/terraformer-ruby) is a mostly faithful port of [terraformer](https://github.com/Esri/Terraformer).
+[terraformer-ruby](https://github.com/kenichi/terraformer-ruby) is a toolkit for working with GeoJSON in pure Ruby. Inspired by [terraformer](https://github.com/Esri/Terraformer).
 
 ## Installation
 
