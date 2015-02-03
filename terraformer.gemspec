@@ -3,7 +3,7 @@ require File.expand_path('../lib/terraformer/version', __FILE__)
 
 Gem::Specification.new do |gem|
   gem.authors       = ["Kenichi Nakamura", "Davy Stevenson"]
-  gem.email         = ["kenichi.nakamura@gmail.com", "davy.stevenson@gmail.com"]]
+  gem.email         = ["kenichi.nakamura@gmail.com", "davy.stevenson@gmail.com"]
   gem.description   = gem.summary = "toolkit for working with GeoJSON in pure Ruby"
   gem.homepage      = "https://github.com/kenichi/terraformer-ruby"
   gem.files         = `git ls-files | grep -Ev '^(myapp|examples)'`.split("\n")
