@@ -32,7 +32,9 @@ module Terraformer
 
       def flatten_coordinates_from points
         cs = []
-        points.each_coordinate {|c| cs << c}
+        Geometry.iter_coordinate points, :each do |c|
+          cs << c
+        end
         cs.sort!.uniq!
         cs
       end

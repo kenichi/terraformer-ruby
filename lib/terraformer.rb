@@ -5,7 +5,6 @@ require 'bigdecimal/util'
 require 'ext/array'
 require 'ext/big_decimal'
 require 'ext/big_math'
-require 'ext/enumerable'
 require 'forwardable'
 
 # terraformer.rb - a toolkit for working with geojson in ruby
@@ -73,7 +72,9 @@ module Terraformer
     # handles basic JSON parsing for terraformer object constructors.
     #
     def initialize *args
-      arg = String === args[0] ? JSON.parse(args[0]) : args[0]
+      arg = args[0]
+      arg = JSON.parse(arg) if String === arg
+
       raise ArgumentError.new "invalid argument(s): #{args}" unless Hash === arg
       raise ArgumentError.new "invalid type: #{arg['type']}" unless arg['type'] == self.type
       yield arg if block_given?

@@ -13,11 +13,33 @@ module Terraformer
       case
       when args.length > 1
         self.coordinates = Coordinate.from_array args
-      when Array === args[0]
+      when Array === args[0] || Coordinate === args[0]
         self.coordinates = Coordinate.from_array args[0]
       else
         super *args do |arg|
           self.coordinates = Coordinate.from_array arg['coordinates']
+        end
+      end
+    end
+
+    def each_coordinate &block
+      Geometry.iter_coordinate coordinates, :each, &block
+    end
+
+    def map_coordinate &block
+      Geometry.iter_coordinate coordinates, :map, &block
+    end
+
+    def self.iter_coordinate obj, meth, &block
+      if Terraformer::Coordinate === obj
+        block.call obj
+      elsif Array === obj
+        obj.__send__ meth do |pair|
+          if Array === pair
+            Geometry.iter_coordinate pair, meth, &block
+          else
+            block.call pair
+          end
         end
       end
     end
@@ -33,11 +55,11 @@ module Terraformer
     end
 
     def to_mercator
-      self.class.new *coordinates.map_coordinate(&:to_mercator)
+      self.class.new *map_coordinate(&:to_mercator)
     end
 
     def to_geographic
-      self.class.new *coordinates.map_coordinate(&:to_geographic)
+      self.class.new *map_coordinate(&:to_geographic)
     end
 
     def to_feature
@@ -85,8 +107,9 @@ module Terraformer
           raise ArgumentError.new "unsupported type: #{e.type rescue e.class}"
         end
       end
-      return true if begin
-        within? other or other.within? self
+
+      begin
+        return true if within? other or other.within? self
       rescue ArgumentError
         false
       end

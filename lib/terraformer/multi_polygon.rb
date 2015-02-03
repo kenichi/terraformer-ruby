@@ -7,17 +7,27 @@ module Terraformer
 
       # arg is an array of arrays of polygon, holes
       when Array === args[0] && Array === args[0][0] && Array === args[0][0][0] && Array === args[0][0][0][0]
-        self.coordinates = Coordinate.from(*args)
+        self.coordinates = Coordinate.from_array(*args)
 
       when Coordinate === args[0] # only one
         self.coordinates = [[Coordinate.from_array(args)]]
+
       when Array === args[0] # multiple?
-        self.coordinates = [Coordinate.from(args)]
+        self.coordinates = [Coordinate.from_array(args)]
+
       when Polygon === args[0]
         self.coordinates = args.map &:coordinates
 
       else
         super *args
+      end
+
+      # must be an array of arrays of arrays of coordinates (whew!)
+      unless Array === coordinates &&
+             Array === coordinates[0] &&
+             Array === coordinates[0][0] &&
+             Terraformer::Coordinate === coordinates[0][0][0]
+        raise ArgumentError.new 'invalid coordinates for Terraformer::MultiPolygon'
       end
     end
 

@@ -3,15 +3,19 @@ module Terraformer
   class MultiLineString < Geometry
 
     def initialize *args
+
       case
-      when Coordinate === args[0] # only one
-        self.coordinates = [Coordinate.from_array(args)]
-      when Array === args[0] # multiple?
-        self.coordinates = Coordinate.from args
       when LineString === args[0]
         self.coordinates = args.map &:coordinates
       else
         super *args
+      end
+
+      # must be an array of arrays of coordinates
+      unless Array === coordinates &&
+             Array === coordinates[0] &&
+             Terraformer::Coordinate === coordinates[0][0]
+        raise ArgumentError.new 'invalid coordinates for Terraformer::MultiLineString'
       end
     end
 
@@ -25,14 +29,9 @@ module Terraformer
 
     def == obj
       super obj do |o|
-        equal = true
-        lses = line_strings.sort
-        olses = o.line_strings.sort
-        lses.each_with_index do |ls, i|
-          equal = ls == olses[i]
-          break unless equal
-        end
-        equal
+        lses = line_strings.sort {|a,b| a.first_coordinate <=> b.first_coordinate }
+        olses = o.line_strings.sort {|a,b| a.first_coordinate <=> b.first_coordinate }
+        lses == olses
       end
     end
 

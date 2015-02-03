@@ -3,22 +3,32 @@ module Terraformer
   class Polygon < Geometry
 
     def initialize *args
-      case
 
       # each arg is a position of the polygon
-      when Coordinate === args[0] || (Array === args[0] && Numeric === args[0][0])
+      if Coordinate === args[0] || (Array === args[0] && Numeric === args[0][0])
         self.coordinates = [Coordinate.from_array(args)]
 
-      # each arg is an array of positions; first is polygon, rest are "holes"
-      when Array === args[0] && Array === args[0][0] && Numeric === args[0][0][0]
-        self.coordinates = Coordinate.from args
+      elsif Array === args[0]
 
-      # arg is an array of polygon, holes
-      when Array === args[0] && Array === args[0][0] && Array === args[0][0][0]
-        self.coordinates = Coordinate.from *args
+        # each arg is an array of positions; first is polygon, rest are "holes"
+        if Coordinate === args[0][0] ||
+           Array === args[0][0] && Numeric === args[0][0][0]
+          self.coordinates = Coordinate.from_array args
+
+        # arg is an array of polygon, holes
+        elsif Array === args[0][0] && Array === args[0][0][0]
+          self.coordinates = Coordinate.from_array *args
+        end
 
       else
         super *args
+      end
+
+      # must be an array of arrays of coordinates
+      unless Array === coordinates &&
+             Array === coordinates[0] &&
+             Terraformer::Coordinate === coordinates[0][0]
+        raise ArgumentError.new 'invalid coordinates for Terraformer::Polygon'
       end
 
       if line_strings.map(&:linear_ring?).include? false
@@ -40,7 +50,7 @@ module Terraformer
         equal = true
 
         # first check outer polygon
-        equal = self.coordinates[0].polygonally_equal_to? obj.coordinates[0]
+        equal = Polygon.polygonally_equal? self.coordinates[0], obj.coordinates[0]
 
         # then inner polygons (holes)
         #
@@ -51,7 +61,7 @@ module Terraformer
             obj_holes = obj.coordinates[1..-1].sort
 
             self_holes.each_with_index do |hole, idx|
-              equal = hole.polygonally_equal_to? obj_holes[idx]
+              equal = Polygon.polygonally_equal? hole, obj_holes[idx]
               break unless equal
             end
           end
@@ -128,6 +138,42 @@ module Terraformer
 
     def remove_vertex_at idx
       coordinates[0].delete_at idx
+    end
+
+
+    def self.polygonally_equal? a, b
+      if Terraformer::Coordinate === a ||
+         Terraformer::Coordinate === b
+        return a == b
+      end
+
+      raise ArgumentError unless Enumerable === a
+      raise ArgumentError unless Enumerable === b
+
+      # polygons must be the same length
+      return false if a.length != b.length
+
+      # polygons must have the last element be a duplicate
+      # polygon-closing coordinate
+      return false if a[0] != a[-1]
+      return false if b[0] != b[-1]
+
+      equal = true
+
+      # clone so can pop/rotate
+      a = a.clone
+      b = b.clone
+
+      # pop to drop the duplicate, polygon-closing, coordinate
+      a.pop
+      b.pop
+
+      begin
+        b.rotate_until_first_equals a[0]
+        return a == b
+      rescue IndexError
+        return false
+      end
     end
 
   end

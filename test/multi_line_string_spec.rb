@@ -8,15 +8,13 @@ describe Terraformer::MultiLineString do
       a = Terraformer::Coordinate.new -122.6764, 45.5165
       b = a + [0.02, 0.02]
       c = b + [0.1, -0.1]
-      mls = Terraformer::MultiLineString.new a, b, c
+      mls = Terraformer::MultiLineString.new [[a, b, c]]
       mls.to_json.must_equal '{"type":"MultiLineString","coordinates":[[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]]}'
       mls.must_be_valid_geojson
     end
 
     it 'constructs from array - single line' do
-      ## unlike point, multipoint and linestring, passing in the coordinates array directly into multilinestring doesn't work
-      # mls = Terraformer::MultiLineString.new [[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]]
-      mls = Terraformer::MultiLineString.new [[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]
+      mls = Terraformer::MultiLineString.new [[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]]
       mls.to_json.must_equal '{"type":"MultiLineString","coordinates":[[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]]]}'
       mls.must_be_valid_geojson
     end
@@ -47,9 +45,7 @@ describe Terraformer::MultiLineString do
     end
 
     it 'constructs from array - multiple lines' do
-        ## unlike point, multipoint and linestring, passing in the coordinates array directly into multilinestring doesn't work
-        # mls = Terraformer::MultiLineString.new [[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]],[[-121.5564,46.4365],[-121.5364,46.4565],[-121.4364,46.3565]]]
-        mls = Terraformer::MultiLineString.new [[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]],[[-121.5564,46.4365],[-121.5364,46.4565],[-121.4364,46.3565]]
+      mls = Terraformer::MultiLineString.new [[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]],[[-121.5564,46.4365],[-121.5364,46.4565],[-121.4364,46.3565]]]
       mls.to_json.must_equal '{"type":"MultiLineString","coordinates":[[[-122.6764,45.5165],[-122.6564,45.5365],[-122.5564,45.4365]],[[-121.5564,46.4365],[-121.5364,46.4565],[-121.4364,46.3565]]]}'
       mls.must_be_valid_geojson
     end

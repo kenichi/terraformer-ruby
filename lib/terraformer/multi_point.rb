@@ -9,6 +9,12 @@ module Terraformer
       else
         super *args
       end
+
+      # must be an array of coordinates
+      unless Array === coordinates &&
+             Terraformer::Coordinate === coordinates[0]
+        raise ArgumentError.new 'invalid coordinates for Terraformer::MultiPoint'
+      end
     end
 
     def first_coordinate

@@ -25,8 +25,8 @@ require 'terraformer'
 
 ##### Create a Terraformer primitive from GeoJSON
 
-```
-> polygon = Terraformer.parse '{
+```ruby
+polygon = Terraformer.parse '{
   "type": "Polygon",
   "coordinates": [
     [
@@ -41,24 +41,32 @@ require 'terraformer'
   ]
 }'
 
-> point = Terraformer.parse '{
+point = Terraformer.parse '{
   "type": "Point",
   "coordinates": [-122.66947746276854, 45.51775972687403]
 }'
 
 ```
+
 Now that you have a point and a polygon primitive you can use the primitive helper methods.
 
-```
+```ruby
 # add a new vertex to our polygon
-> new_point = Terraformer::Point.new -122.6708507537842, 45.513188859735436
-> polygon.insert_vertex 2, new_point
+new_point = Terraformer::Point.new -122.6708507537842, 45.513188859735436
+polygon.insert_vertex 2, new_point
 ```
+
 You can also have Terraformer perform many geometric operations like convex hulls and bounding boxes.
-```
-> convex_hull = polygon.convex_hull
-> point.within? convex_hull #returns true
-> bounding_box = polygon.bbox #returns the bounding box for this object.
+
+```ruby
+# returns convex hull
+convex_hull = polygon.convex_hull
+
+point.within? convex_hull
+=> true
+
+# returns the bounding box
+bounding_box = polygon.bbox
 ```
 
 ## Contributing
