@@ -2,6 +2,10 @@ module Terraformer
 
   class Point < Geometry
 
+    DEFAULT_RANDOM_POINTS = 10
+    DEFAULT_RANDOM_DELTA = 0.05 # degrees
+    DEFAULT_RANDOM_ROUND = 5
+
     def initialize *args
       super
 
@@ -81,6 +85,17 @@ module Terraformer
         obj.polygons.any? {|p| p.contains? self}
       else
         raise ArgumentError unless Geometry === obj
+      end
+    end
+
+    def random_points n = DEFAULT_RANDOM_POINTS,
+                      delta = DEFAULT_RANDOM_DELTA,
+                      round = DEFAULT_RANDOM_ROUND
+      s = ->{rand(2) * 2 - 1} # -1 or 1
+      Array.new(n) do
+        x = (coordinates.x + s[] * rand() * delta).round(round)
+        y = (coordinates.y + s[] * rand() * delta).round(round)
+        Terraformer::Point.new x, y
       end
     end
 
